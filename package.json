@@ -1,0 +1,13 @@
+{
+  "name": "Knit",
+  "version": "1.0.0",
+  "author": "David Evans",
+  "license": "GPL-3.0-or-later",
+  "private": true,
+  "scripts": {
+    "start": "static-server --index index.html --port 8080"
+  },
+  "devDependencies": {
+    "static-server": "2.x"
+  }
+}

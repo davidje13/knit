@@ -1,0 +1,68 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: sans-serif;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: #EEEEEE;
+}
+
+.menu {
+  background: #DDDDDD;
+  padding: 8px 4px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.menu button {
+  width: 2em;
+  height: 2em;
+  font: 1em sans-serif;
+  line-height: 1;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.sample {
+  width: 1em;
+  height: 1em;
+  border: 1px solid #000000;
+  border-radius: 100%;
+  background: var(--col);
+  box-sizing: border-box;
+}
+
+button[data-active] .sample {
+  box-shadow: 0 0 0 4px #66AADD;
+}
+
+.sep {
+  display: inline-block;
+  width: 1px;
+  height: 100%;
+  background: #CCCCCC;
+  margin: 0 4px 0 8px;
+  vertical-align: middle;
+}
+
+.display {
+  padding: 8px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+  align-items: center;
+  justify-items: center;
+}
+
+.preview {
+  width: 400px;
+  height: 400px;
+  background-repeat: repeat;
+  image-rendering: pixelated;
+  border: 1px solid #666666;
+}

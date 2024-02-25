@@ -1,0 +1,17 @@
+.grid-view {
+  display: block;
+  position: relative;
+}
+
+.grid-view-image {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.grid-view-grid {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  image-rendering: pixelated;
+}

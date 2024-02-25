@@ -1,69 +1,13 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
-<title>Stitches</title>
-<script>
-const VIS = [
-	'',
-	'|',
-	'/\\',
-];
-
-window.addEventListener('DOMContentLoaded', () => {
-	const iHave = document.getElementsByName('have')[0];
-	const iNeed = document.getElementsByName('need')[0];
-	const oResult = document.getElementById('result');
-
-	function update() {
-		const have = Number.parseInt(iHave.value);
-		const need = Number.parseInt(iNeed.value);
-		if (need > have || need * 2 < have) {
-			oResult.innerText = '-';
-			return;
-		}
-
-		const ys = [];
-		let D = -have;
-		let y = 0;
-		for (let x = 0; x < have; ++x) {
-			D += 2 * need;
-			ys.push(y);
-			if (D > 0) {
-				++y;
-				D -= 2 * have;
-			}
-		}
-		ys.push(-1);
-		const result = [];
-		let n = 0;
-		let cury = 0;
-		for (const y of ys) {
-			if (y === cury) {
-				++n;
-			} else {
-				result.push(n);
-				n = 1;
-				cury = y;
-			}
-		}
-		oResult.innerText = result
-			.map((n) => VIS[n])
-			.join('');
-	}
-
-	for (const i of [iHave, iNeed]) {
-		i.addEventListener('input', update);
-	}
-	update();
-});
-</script>
+<meta charset="utf-8">
+<title>Knitting Tools</title>
 </head>
 <body>
-<form action="#">
-<label>I <em>have</em> <input name="have" type="number" min="1" value="100" /> stitches</label>
-<br />
-<label>I <em>need</em> <input name="need" type="number" min="1" value="100" /> stitches</label>
-<br />
-<pre id="result"></pre>
-</form>
+  <ul>
+    <li><a href="/stitches">Stitch expansion / reduction</a></li>
+    <li><a href="/pattern">Repeating pattern builder</a></li>
+  </ul>
 </body>
 </html>
