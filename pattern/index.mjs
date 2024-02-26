@@ -9,7 +9,15 @@ export class EditorPage extends EventTarget {
   constructor({ width, height, cellWidth, cellHeight }) {
     super();
 
-    this.palette = [0xFFFFFF, 0x000000, 0x339966];
+    this.palette = [
+      0xFFFFFF,
+      0x000000,
+      0xAA3311,
+      0xDD9922,
+      0x339966,
+      0x1188BB,
+      0x8833BB,
+    ];
     this.activePalette = 1;
 
     this.editorView = new GridView({

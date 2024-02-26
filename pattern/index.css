@@ -92,9 +92,10 @@ button[data-active] .sample {
 }
 
 .preview {
-  width: 400px;
-  height: 400px;
+  width: 600px;
+  height: 600px;
   max-width: calc(100vw - 18px);
+  max-height: calc(100vw - 18px);
   border: 1px solid #666666;
 }
 
