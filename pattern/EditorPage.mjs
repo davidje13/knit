@@ -79,6 +79,7 @@ export class EditorPage extends EventTarget {
       }
       this.editorView.setPalette(this.palette);
     };
+    this._updatePalette = updatePalette;
 
     this.menu = el('div', { 'class': 'menu' }, [
       this.palettePicker,
@@ -106,6 +107,14 @@ export class EditorPage extends EventTarget {
 
   clear() {
     this.editorView.fill(0);
+  }
+
+  setPalette(palette) {
+    this.palette = palette;
+    if (this.activePalette >= this.palette.length) {
+      this.activePalette = 0;
+    }
+    this._updatePalette();
   }
 
   getGrid() {

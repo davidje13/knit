@@ -338,7 +338,3 @@ void main(void) {
   vec3 c = texture(stitch, stitchUV).xyz * (texture(design, designUV).xyz * 0.9 + 0.1);
   col = vec4(pow(c, vec3(0.7)) * 1.05, 1.0);
 }`;
-
-function prevent(e) {
-  e.preventDefault();
-}
