@@ -9,6 +9,8 @@ body {
   display: grid;
   grid-template-rows: auto 1fr;
   background: #EEEEEE;
+  user-select: none;
+  -webkit-touch-callout: none;
 
   --resize-width: 3px;
   --resize-length-corner: 18px;
