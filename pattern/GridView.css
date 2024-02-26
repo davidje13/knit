@@ -1,6 +1,9 @@
 .grid-view {
   display: block;
   position: relative;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .grid-view-image {

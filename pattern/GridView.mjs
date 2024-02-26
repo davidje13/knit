@@ -37,7 +37,7 @@ export class GridView extends EventTarget {
     this._mc = this._mc.bind(this);
 
     this.container.addEventListener('pointerdown', this._md, { passive: false });
-    this.container.addEventListener('contextmenu', this._prevent, { passive: false });
+    this.container.addEventListener('contextmenu', prevent, { passive: false });
 
     this.setPalette([0xFFFFFF, 0x000000]);
     this.resize({ width, height, fill });
@@ -61,7 +61,7 @@ export class GridView extends EventTarget {
   destroy() {
     this.dirty = false;
     this.container.removeEventListener('pointerdown', this._md);
-    this.container.removeEventListener('contextmenu', this._prevent);
+    this.container.removeEventListener('contextmenu', prevent);
     this._removePointerEvents();
   }
 
@@ -70,10 +70,6 @@ export class GridView extends EventTarget {
       this._removePointerEvents();
     }
     this._readonly = readonly;
-  }
-
-  _prevent(e) {
-    e.preventDefault();
   }
 
   _getCell(e) {
@@ -90,6 +86,7 @@ export class GridView extends EventTarget {
     if (this.updating || this._readonly) {
       return;
     }
+    console.log('md');
     e.preventDefault();
     const c = this._getCell(e);
     if (!c) {
@@ -101,8 +98,8 @@ export class GridView extends EventTarget {
     }
     this.updating = { pointer: e.pointerId, value: updated };
     this.container.setPointerCapture(e.pointerId);
-    window.addEventListener('pointermove', this._mm, { passive: true });
-    window.addEventListener('pointerup', this._mu, { passive: true });
+    window.addEventListener('pointermove', this._mm, { passive: false });
+    window.addEventListener('pointerup', this._mu, { passive: false });
     window.addEventListener('pointercancel', this._mc, { passive: true });
     this._mm(e);
   }
@@ -111,6 +108,8 @@ export class GridView extends EventTarget {
     if (e.pointerId !== this.updating.pointer || this._readonly) {
       return;
     }
+    console.log('mm');
+    e.preventDefault();
     const c = this._getCell(e);
     if (c) {
       this.setCell(c.x, c.y, this.updating.value);
@@ -258,4 +257,9 @@ export class GridView extends EventTarget {
     }
     this.dispatchEvent(new CustomEvent('rendered', { detail: this.canvas }));
   }
+}
+
+function prevent(e) {
+  console.log('prevent');
+  e.preventDefault();
 }

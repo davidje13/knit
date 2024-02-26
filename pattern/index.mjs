@@ -50,7 +50,7 @@ export class EditorPage extends EventTarget {
       this.editorView.setGrid(d);
     };
 
-    this.palettePicker = el('span');
+    this.palettePicker = el('div');
     const pickers = [];
 
     const updatePalette = () => {
@@ -82,17 +82,20 @@ export class EditorPage extends EventTarget {
 
     this.menu = el('div', { 'class': 'menu' }, [
       this.palettePicker,
-      el('div', { 'class': 'sep' }),
-      makeButton('\u2194', 'flip horizontally', () => applyAction(mirrorX)),
-      makeButton('\u2195', 'flip vertically', () => applyAction(mirrorY)),
-      el('div', { 'class': 'sep' }),
-      makeButton('\u2190', 'pan left', () => applyAction(shift(1, 0))),
-      makeButton('\u2192', 'pan right', () => applyAction(shift(-1, 0))),
-      makeButton('\u2191', 'pan up', () => applyAction(shift(0, 1))),
-      makeButton('\u2193', 'pan down', () => applyAction(shift(0, -1))),
-      el('div', { 'class': 'sep' }),
-      makeButton('\u21BB', 'rotate clockwise', () => applyAction(transpose, mirrorX)),
-      makeButton('\u21BA', 'rotate counter-clockwise', () => applyAction(transpose, mirrorY)),
+      el('div', {}, [
+        makeButton('\u2194', 'flip horizontally', () => applyAction(mirrorX)),
+        makeButton('\u2195', 'flip vertically', () => applyAction(mirrorY)),
+      ]),
+      el('div', {}, [
+        makeButton('\u2190', 'pan left', () => applyAction(shift(1, 0))),
+        makeButton('\u2192', 'pan right', () => applyAction(shift(-1, 0))),
+        makeButton('\u2191', 'pan up', () => applyAction(shift(0, 1))),
+        makeButton('\u2193', 'pan down', () => applyAction(shift(0, -1))),
+      ]),
+      el('div', {}, [
+        makeButton('\u21BB', 'rotate clockwise', () => applyAction(transpose, mirrorX)),
+        makeButton('\u21BA', 'rotate counter-clockwise', () => applyAction(transpose, mirrorY)),
+      ]),
     ]);
 
     this.container = editorResizer.container;
