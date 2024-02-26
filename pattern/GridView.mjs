@@ -86,7 +86,6 @@ export class GridView extends EventTarget {
     if (this.updating || this._readonly) {
       return;
     }
-    console.log('md');
     e.preventDefault();
     const c = this._getCell(e);
     if (!c) {
@@ -108,7 +107,6 @@ export class GridView extends EventTarget {
     if (e.pointerId !== this.updating.pointer || this._readonly) {
       return;
     }
-    console.log('mm');
     e.preventDefault();
     const c = this._getCell(e);
     if (c) {
@@ -260,6 +258,5 @@ export class GridView extends EventTarget {
 }
 
 function prevent(e) {
-  console.log('prevent');
   e.preventDefault();
 }
