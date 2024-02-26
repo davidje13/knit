@@ -1,7 +1,9 @@
 import { GridView } from './GridView.mjs';
+import { Preview } from './Preview.mjs';
 import { Resizer } from './Resizer.mjs';
 import { mirrorX, mirrorY, transpose, shift } from './actions.mjs';
 import { el, makeButton } from './dom.mjs';
+import { debounce } from './debounce.mjs';
 
 export class EditorPage extends EventTarget {
   constructor({ width, height, cellWidth, cellHeight }) {
@@ -117,20 +119,23 @@ export class EditorPage extends EventTarget {
   }
 }
 
-const previewScale = 3;
-
 const favicon = el('link', { 'rel': 'icon' });
 document.head.append(favicon);
 
-const editor = new EditorPage({ width: 20, height: 20, cellWidth: 16, cellHeight: 16 });
-const preview = el('div', { class: 'preview' });
-function updatePreview() {
-  const canvas = editor.editorView.canvas;
-  const img = canvas.toDataURL();
-  favicon.setAttribute('href', img);
-  preview.style.backgroundImage = `url(${img})`;
-  preview.style.backgroundSize = `${canvas.width * previewScale}px ${canvas.height * previewScale}px`;
+const editor = new EditorPage({ width: 10, height: 10, cellWidth: 16, cellHeight: 16 });
+const preview = new Preview();
+function updateFavicon() {
+  favicon.setAttribute('href', editor.editorView.canvas.toDataURL());
 }
+const debouncedUpdateFavicon = debounce(updateFavicon, 500);
+function updatePreview() {
+  preview.setTextureFrom(editor.editorView.canvas);
+}
+document.body.append(editor.menu, el('div', { 'class': 'display' }, [
+  editor.container,
+  el('div', { 'class': 'preview' }, [preview.canvas]),
+]));
 editor.editorView.addEventListener('rendered', updatePreview);
-document.body.append(editor.menu, el('div', { 'class': 'display' }, [editor.container, preview]));
+editor.editorView.addEventListener('rendered', debouncedUpdateFavicon);
 updatePreview();
+updateFavicon();
