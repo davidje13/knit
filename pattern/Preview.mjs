@@ -37,10 +37,11 @@ export class Preview {
     this._mm = this._mm.bind(this);
     this._mu = this._mu.bind(this);
     this._mc = this._mc.bind(this);
+    this._removePointerEvents = this._removePointerEvents.bind(this);
     this.render = this.render.bind(this);
 
     this.canvas.addEventListener('pointerdown', this._md, { passive: false });
-    this.canvas.addEventListener('contextmenu', prevent, { passive: false });
+    this.canvas.addEventListener('contextmenu', this._removePointerEvents, { passive: true });
     window.addEventListener('resize', this.render, { passive: true });
 
     const stitch = new Image();
@@ -66,7 +67,7 @@ export class Preview {
 
   destroy() {
     this.canvas.removeEventListener('pointerdown', this._md);
-    this.canvas.removeEventListener('contextmenu', prevent);
+    this.canvas.removeEventListener('contextmenu', this._removePointerEvents);
     window.removeEventListener('resize', this.render);
     this._removePointerEvents();
   }
