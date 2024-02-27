@@ -282,11 +282,14 @@ export class Preview {
 
     ctx.clear(GL.COLOR_BUFFER_BIT);
 
-    const xx = Math.floor(this.dx);
-    const yy = Math.floor(this.dy);
+    const ox = this.dx + (this.designW - 1) / 2 - w / this.scale / 2;
+    const oy = this.dy + (this.designH - 1) / 2 - h / this.scale / 2;
+
+    const xx = Math.floor(ox);
+    const yy = Math.floor(oy);
 
     ctx.uniform1i(this.stitchProgDimX, nx);
-    ctx.uniform2f(this.stitchProgOrigin, (xx - this.dx) * sx, (yy - this.dy) * sy);
+    ctx.uniform2f(this.stitchProgOrigin, (xx - ox) * sx, (yy - oy) * sy);
     ctx.uniform2f(this.stitchProgDelta, sx, sy);
     ctx.uniform2f(this.stitchProgDesignOrigin, (xx / this.designW) % 1, (yy / this.designH) % 1);
     ctx.uniform2f(this.stitchProgDesignDelta, 1 / this.designW, 1 / this.designH);
