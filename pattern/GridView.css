@@ -11,6 +11,18 @@
   image-rendering: pixelated;
 }
 
+.grid-view-reference {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  opacity: 0.2;
+}
+
 .grid-view-grid {
   display: block;
   position: absolute;

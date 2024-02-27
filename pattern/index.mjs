@@ -46,6 +46,23 @@ function loadHash() {
 
 window.addEventListener('hashchange', loadHash);
 
+window.addEventListener('dragover', (e) => {
+  e.preventDefault();
+});
+
+window.addEventListener('drop', async (e) => {
+  e.preventDefault();
+  const files = [...e.dataTransfer.items]
+    .filter((item) => item.kind === 'file' && /^image\//.test(item.type))
+    .map((item) => item.getAsFile());
+
+  if (files.length) {
+    const r = new FileReader();
+    r.addEventListener('load', () => editor.setReferenceImage(r.result), { once: true });
+    r.readAsDataURL(files[0]);
+  }
+});
+
 const preview = new Preview();
 function updatePage() {
   favicon.setAttribute('href', editor.editorView.canvas.toDataURL());
@@ -57,7 +74,7 @@ function updatePreview() {
   preview.setTextureFrom(editor.editorView.canvas);
 }
 document.body.append(editor.menu, el('div', { 'class': 'display' }, [
-  editor.container,
+  el('div', { 'class': 'centre' }, [editor.container]),
   el('div', { 'class': 'preview' }, [preview.canvas]),
 ]));
 editor.editorView.addEventListener('rendered', updatePreview);

@@ -117,6 +117,10 @@ export class EditorPage extends EventTarget {
     this._updatePalette();
   }
 
+  setReferenceImage(url) {
+    this.editorView.setReferenceImage(url);
+  }
+
   getGrid() {
     return this.editorView.getGrid();
   }

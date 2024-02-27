@@ -26,10 +26,12 @@ export class GridView extends EventTarget {
     this.canvas = el('canvas', { 'class': 'grid-view-image' });
     this.ctx = this.canvas.getContext('2d', { alpha: false, willReadFrequently: true });
 
+    this.referenceImage = el('div', { 'class': 'grid-view-reference' });
+
     this.gridCanvas = el('canvas', { 'class': 'grid-view-grid' });
     this.gridCtx = this.gridCanvas.getContext('2d', { alpha: true, willReadFrequently: false });
 
-    this.container = el('div', { 'class': 'grid-view' }, [this.canvas, this.gridCanvas]);
+    this.container = el('div', { 'class': 'grid-view' }, [this.canvas, this.referenceImage, this.gridCanvas]);
 
     this._md = this._md.bind(this);
     this._mm = this._mm.bind(this);
@@ -127,6 +129,10 @@ export class GridView extends EventTarget {
       return;
     }
     this._removePointerEvents();
+  }
+
+  setReferenceImage(url) {
+    this.referenceImage.style.backgroundImage = url ? `url(${url})` : 'none';
   }
 
   getGrid() {

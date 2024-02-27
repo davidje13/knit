@@ -85,18 +85,23 @@ button[data-active] .sample {
   padding: 8px;
   display: flex;
   flex-flow: row wrap;
-  justify-content: space-around;
-  align-items: center;
-  justify-items: center;
+  justify-content: center;
   gap: 16px;
 }
 
+.centre {
+  flex: 1000000;
+  display: grid;
+  align-content: center;
+  justify-content: center;
+}
+
 .preview {
-  width: 600px;
-  height: 600px;
-  max-width: calc(100vw - 18px);
-  max-height: calc(100vw - 18px);
+  width: max(45vw, 45vh);
+  height: max(45vw, 45vh);
+  align-self: center;
   border: 1px solid #666666;
+  box-sizing: border-box;
 }
 
 .preview canvas {
