@@ -3,10 +3,15 @@
 <head>
 <title>Stitches - Knitting Tools</title>
 <script>
-const VIS = [
+const VIS_DEC = [
 	'',
 	'|',
 	'/\\',
+];
+const VIS_INC = [
+	'',
+	'|',
+	'|\'',
 ];
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -17,20 +22,22 @@ window.addEventListener('DOMContentLoaded', () => {
 	function update() {
 		const have = Number.parseInt(iHave.value);
 		const need = Number.parseInt(iNeed.value);
-		if (need > have || need * 2 < have) {
+		const from = Math.max(have, need);
+		const to = Math.min(have, need);
+		if (from > to * 2) {
 			oResult.innerText = '-';
 			return;
 		}
 
 		const ys = [];
-		let D = -have;
+		let D = -from;
 		let y = 0;
-		for (let x = 0; x < have; ++x) {
-			D += 2 * need;
+		for (let x = 0; x < from; ++x) {
+			D += 2 * to;
 			ys.push(y);
 			if (D > 0) {
 				++y;
-				D -= 2 * have;
+				D -= 2 * from;
 			}
 		}
 		ys.push(-1);
@@ -46,8 +53,9 @@ window.addEventListener('DOMContentLoaded', () => {
 				cury = y;
 			}
 		}
+		const vis = inc ? VIS_INC : VIS_DEC;
 		oResult.innerText = result
-			.map((n) => VIS[n])
+			.map((n) => vis[n])
 			.join('');
 	}
 
