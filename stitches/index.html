@@ -53,7 +53,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				cury = y;
 			}
 		}
-		const vis = inc ? VIS_INC : VIS_DEC;
+		const vis = need > have ? VIS_INC : VIS_DEC;
 		oResult.innerText = result
 			.map((n) => vis[n])
 			.join('');
