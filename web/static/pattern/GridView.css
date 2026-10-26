@@ -1,32 +1,32 @@
 .grid-view {
-  display: block;
-  position: relative;
-  touch-action: none;
-  user-select: none;
-  -webkit-touch-callout: none;
+	display: block;
+	position: relative;
+	touch-action: none;
+	user-select: none;
+	-webkit-touch-callout: none;
 }
 
 .grid-view-image {
-  display: block;
-  image-rendering: pixelated;
+	display: block;
+	image-rendering: pixelated;
 }
 
 .grid-view-reference {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: contain;
-  background-position: center center;
-  background-repeat: no-repeat;
-  opacity: 0.2;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-size: contain;
+	background-position: center center;
+	background-repeat: no-repeat;
+	opacity: 0.2;
 }
 
 .grid-view-grid {
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  image-rendering: pixelated;
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	image-rendering: pixelated;
 }

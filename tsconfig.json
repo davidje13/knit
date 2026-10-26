@@ -1,15 +1,15 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "module": "node16",
-    "moduleResolution": "node16",
-    "noEmit": true,
-    "allowJs": true,
-    "checkJs": true,
-    "strict": true,
-    "strictNullChecks": false,
-    "noImplicitAny": true
-  },
-  "include": ["web"],
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"module": "node16",
+		"moduleResolution": "node16",
+		"noEmit": true,
+		"allowJs": true,
+		"checkJs": true,
+		"strict": true,
+		"strictNullChecks": false,
+		"noImplicitAny": true
+	},
+	"include": ["web"]
 }
