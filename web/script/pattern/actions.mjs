@@ -1,3 +1,7 @@
+/** @typedef {import('./GridView.mjs').Image} Image */
+/** @typedef {(image: Image) => import('./GridView.mjs').Image} ImageAction */
+
+/** @type {ImageAction} */
 export function mirrorX({ data, width, height }) {
   const newData = new Uint8Array(data);
   for (let y = 0; y < height; ++y) {
@@ -9,6 +13,7 @@ export function mirrorX({ data, width, height }) {
   return { data: newData, width, height };
 }
 
+/** @type {ImageAction} */
 export function mirrorY({ data, width, height }) {
   const newData = new Uint8Array(data);
   for (let y = 0; y < height; ++y) {
@@ -20,6 +25,7 @@ export function mirrorY({ data, width, height }) {
   return { data: newData, width, height };
 }
 
+/** @type {ImageAction} */
 export function transpose({ data, width, height }) {
   const newData = new Uint8Array(data);
   for (let y = 0; y < height; ++y) {
@@ -30,6 +36,7 @@ export function transpose({ data, width, height }) {
   return { data: newData, width: height, height: width };
 }
 
+/** @type {(dx: number, dy: number) => ImageAction} */
 export const shift = (dx, dy) => ({ data, width, height }) => {
   const newData = new Uint8Array(data);
   for (let y = 0; y < height; ++y) {
@@ -40,4 +47,8 @@ export const shift = (dx, dy) => ({ data, width, height }) => {
   return { data: newData, width, height };
 };
 
+/**
+ * @param {number} a
+ * @param {number} b
+ */
 const posmod = (a, b) => ((a % b) + b) % b;

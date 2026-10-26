@@ -3,6 +3,13 @@ export class ExpGolomb {
     this.k = k;
   }
 
+  /**
+   * @param {{
+   *   writeBit(bit: 1 | 0): void;
+   *   writeBinary(value: number, bits: number): void;
+   * }} encoder
+   * @param {number} value
+   */
   write(encoder, value) {
     if (value < 0) {
       throw new Error(`value ${value} out of bounds (positive integer)`);
@@ -18,6 +25,12 @@ export class ExpGolomb {
     }
   }
 
+  /**
+   * @param {{
+   *   readWhile(check: 1 | 0): number;
+   *   readBinary(bits: number): number;
+   * }} decoder
+   */
   read(decoder) {
     const bits = decoder.readWhile(0) + 1;
     const a = decoder.readBinary(bits) - 1;
@@ -29,6 +42,7 @@ export class ExpGolomb {
   }
 }
 
+/** @param {number} v */
 function bitLength(v) {
   let n = 0;
   for (; v; v >>>= 1) {

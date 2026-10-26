@@ -25,7 +25,7 @@ const editor = new EditorPage({
   palette: DEFAULT_PALETTE,
 });
 
-let lastHash = null;
+/** @type {string | null} */ let lastHash = null;
 
 function loadHash() {
   const hash = window.location.hash.substring(1);
@@ -58,7 +58,7 @@ window.addEventListener('drop', async (e) => {
 
   if (files.length) {
     const r = new FileReader();
-    r.addEventListener('load', () => editor.setReferenceImage(r.result), { once: true });
+    r.addEventListener('load', () => editor.setReferenceImage(/** @type {string} */ (r.result)), { once: true });
     r.readAsDataURL(files[0]);
   }
 });

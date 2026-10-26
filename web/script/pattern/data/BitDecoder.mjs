@@ -1,6 +1,7 @@
 import { fromB64 } from './base64.mjs';
 
 export class BitDecoder {
+  /** @param {string} data */
   constructor(data) {
     this.sextets = [];
     for (let i = 0; i < data.length; ++i) {
@@ -24,6 +25,7 @@ export class BitDecoder {
     return v;
   }
 
+  /** @param {boolean | 1 | 0} check */
   readWhile(check) {
     if (this.pos >= this.l) {
       throw new Error('out of data');
@@ -44,6 +46,7 @@ export class BitDecoder {
     return n;
   }
 
+  /** @param {number} count */
   readBits(count) {
     const r = [];
     for (let i = 0; i < count; ++i) {
@@ -59,6 +62,7 @@ export class BitDecoder {
     }
   }
 
+  /** @param {number} bits */
   readBinary(bits) {
     let r = 0;
     for (let i = 0; i < bits; ++i) {

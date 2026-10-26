@@ -11,7 +11,26 @@ const DIRECTIONS = [
   { className: 'se', x: 1, y: 1 },
 ];
 
-export class Resizer extends EventTarget {
+/**
+ * @typedef {(TypedEventTarget<{
+ *   change: { detail: { width: number; height: number; dx: number; dy: number } };
+ * }>)} ResizerEventTarget
+ */
+
+export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
+  /**
+   * @param {HTMLElement} content
+   * @param {{
+   *   getCurrentSize?: () => ({ width: number, height: number });
+   *   getLabel?: (width: number, height: number) => string;
+   *   xScale?: number;
+   *   yScale?: number;
+   *   xMin?: number;
+   *   yMin?: number;
+   *   xMax?: number;
+   *   yMax?: number;
+   * }} options
+   */
   constructor(content, {
     getCurrentSize = () => content.getBoundingClientRect(),
     getLabel = (w, h) => `${w}\u00D7${h}`,
@@ -45,7 +64,7 @@ export class Resizer extends EventTarget {
     this.handles = [];
     for (let i = 0; i < DIRECTIONS.length; ++i) {
       const handle = el('div', { 'class': `handle ${DIRECTIONS[i].className}` });
-      handle.dataset.resizeIndex = i;
+      handle.dataset.resizeIndex = String(i);
       handle.addEventListener('pointerdown', this._md, { passive: false });
       handle.addEventListener('contextmenu', prevent, { passive: false });
       this.container.append(handle);
@@ -77,13 +96,15 @@ export class Resizer extends EventTarget {
     this._removePointerEvents();
   }
 
+  /** @param {PointerEvent} e */
   _md(e) {
-    const index = e.target.dataset?.resizeIndex;
+    const handle = /** @type {HTMLElement} */ (e.target);
+    const index = handle.dataset?.resizeIndex;
     if (index === undefined || e.button !== 0 || this.dragState !== null) {
       return;
     }
     e.preventDefault();
-    e.target.setPointerCapture(e.pointerId);
+    handle.setPointerCapture(e.pointerId);
     const domSize = this.wrapper.getBoundingClientRect();
     const size = this._getCurrentSize();
     this.dragState = {
@@ -97,8 +118,8 @@ export class Resizer extends EventTarget {
         padY: domSize.height - size.height * this.yScale,
       },
       latest: { x: e.clientX, y: e.clientY, altKey: e.altKey },
-      handle: e.target,
-      mode: DIRECTIONS[index],
+      handle,
+      mode: DIRECTIONS[Number(index)],
     };
     window.addEventListener('pointermove', this._mm, { passive: false });
     window.addEventListener('keydown', this._mmk, { passive: true });
@@ -135,6 +156,7 @@ export class Resizer extends EventTarget {
     return { w, h, dx, dy };
   }
 
+  /** @param {PointerEvent} e */
   _mm(e) {
     if (e.pointerId !== this.dragState.pointer) {
       return;
@@ -144,6 +166,7 @@ export class Resizer extends EventTarget {
     this._updatePreview();
   }
 
+  /** @param {KeyboardEvent} e */
   _mmk(e) {
     if (this.dragState.latest.altKey !== e.altKey) {
       this.dragState.latest.altKey = e.altKey;
@@ -151,6 +174,7 @@ export class Resizer extends EventTarget {
     }
   }
 
+  /** @param {PointerEvent} e */
   _mu(e) {
     if (e.pointerId !== this.dragState.pointer) {
       return;
@@ -176,6 +200,7 @@ export class Resizer extends EventTarget {
     }
   }
 
+  /** @param {PointerEvent} e */
   _mc(e) {
     if (e.pointerId !== this.dragState.pointer) {
       return;
@@ -190,6 +215,31 @@ export class Resizer extends EventTarget {
   }
 }
 
+/** @param {Event} e */
 function prevent(e) {
   e.preventDefault();
 }
+
+/**
+ * @template {Event} T
+ * @typedef {(e: T) => void} TypedEventListener
+ */
+
+/**
+ * @template {Event} T
+ * @typedef {{ handleEvent(e: T): void }} TypedEventListenerObject
+ */
+
+/**
+ * @template {Event} T
+ * @typedef {TypedEventListener<T> | TypedEventListenerObject<T>} TypedEventListenerOrEventListenerObject
+ */
+
+/**
+ * @template {Record<string, unknown>} T
+ * @typedef {{ new(): {
+ *   addEventListener<const K extends keyof T>(type: K, listener: TypedEventListenerOrEventListenerObject<Event & T[K]>, options?: AddEventListenerOptions | boolean): void;
+ *   removeEventListener(type: string, callback: EventListenerOrEventListenerObject | null, options?: EventListenerOptions | boolean): void;
+ *   dispatchEvent(event: Event): boolean;
+ * }}} TypedEventTarget
+ */

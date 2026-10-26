@@ -1,13 +1,35 @@
 {
   "name": "Knit",
   "version": "1.0.0",
+  "description": "Knitting Pattern Design Tools",
+  "private": true,
+  "bin": "./cli/png.mjs",
+  "scripts": {
+    "start": "rm -rf build; mkdir -p build/static && cp web/config.json build/config.json && web-listener -c build/config.json --dir web/static --no-cache --exec 'rollup --config rollup.config.mjs --watch'",
+    "build": "rm -rf build; mkdir -p build && cp -R web/static web/config.json build && rollup --config rollup.config.mjs && cd build && zip -8Xr -n .png - * > ../web-bundle.zip",
+    "lint": "tsc",
+    "test": "lean-test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidje13/knit.git"
+  },
+  "keywords": [
+    "png"
+  ],
   "author": "David Evans",
   "license": "GPL-3.0-or-later",
-  "private": true,
-  "scripts": {
-    "start": "static-server --index index.html --port 8080"
+  "bugs": {
+    "url": "https://github.com/davidje13/knit/issues"
   },
+  "homepage": "https://github.com/davidje13/knit#readme",
   "devDependencies": {
-    "static-server": "2.x"
+    "@rollup/plugin-node-resolve": "16.x",
+    "@rollup/plugin-terser": "1.x",
+    "@types/node": "24.x",
+    "lean-test": "2.x",
+    "rollup": "4.x",
+    "typescript": "6.0.x",
+    "web-listener": "1.5.x"
   }
 }

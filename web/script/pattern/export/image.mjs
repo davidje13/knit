@@ -7,6 +7,11 @@ const sizeFormat = new ExpGolomb(4);
 const MAX_SIZE = 1000;
 const MAX_PALETTE = 255;
 
+/**
+ * @param {{ width: number; height: number; data: number[] | Uint8Array }} image
+ * @param {number[]} palette
+ * @returns
+ */
 export function compressImage({ width, height, data }, palette) {
   const encoder = new BitEncoder();
   const p = palette.length;
@@ -30,6 +35,10 @@ export function compressImage({ width, height, data }, palette) {
   return `I${encoder}`;
 }
 
+/**
+ * @param {string} compressed
+ * @return {import('../GridView.mjs').Image & { palette: number[] }}
+ */
 export function decompressImage(compressed) {
   if (compressed[0] !== 'I') {
     throw new Error('unknown image compression');
@@ -42,8 +51,8 @@ export function decompressImage(compressed) {
   if (width > MAX_SIZE || height > MAX_SIZE || p > MAX_PALETTE) {
     throw new Error('unsupported size');
   }
-  const palette = [];
-  const pUsed = [];
+  /** @type {number[]} */ const palette = [];
+  /** @type {number[]} */ const pUsed = [];
   for (let i = 0; i < p; ++i) {
     palette.push(decoder.readBinary(24));
     if (decoder.readBit()) {
@@ -60,12 +69,13 @@ export function decompressImage(compressed) {
   return { width, height, data, palette };
 }
 
+/** @param {number} limit */
 function getUniformHuffman(limit) {
   if (limit < 0) {
     throw new Error(`invalid huffman limit: ${limit}`);
   }
   if (!HUFFMAN_CACHE.has(limit)) {
-    const symbols = [];
+    /** @type {[number, number][]} */ const symbols = [];
     for (let i = 0; i <= limit; ++i) {
       symbols.push([i, 1]);
     }

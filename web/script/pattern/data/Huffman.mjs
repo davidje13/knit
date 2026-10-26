@@ -1,6 +1,10 @@
+/** @typedef {{ value: number, length: number, pattern: (1 | 0)[] | null }} HuffmanEntry */
+/** @typedef {{ value: number | null; p: Rational; parent: HuffmanFrequency | null }} HuffmanFrequency */
+
 export class Huffman {
+  /** @param {[number, number][]} symbolLengths */
   constructor(symbolLengths) {
-    this.symbols = new Map();
+    /** @type {Map<number, HuffmanEntry>} */ this.symbols = new Map();
     for (const [value, length] of symbolLengths) {
       if (length) {
         this.symbols.set(value, { value, length, pattern: null });
@@ -11,9 +15,9 @@ export class Huffman {
       this.symbols.values().next().value.length = 0;
     }
 
-    this.sorted = [];
+    /** @type {HuffmanEntry[]} */ this.sorted = [];
 
-    const v = [];
+    /** @type {(1 | 0)[]} */ const v = [];
     // shorter codes first (sort is stable so order of elements is otherwise maintained)
     for (const symbol of [...this.symbols.values()].sort((a, b) => a.length - b.length)) {
       if (v.length) {
@@ -34,9 +38,13 @@ export class Huffman {
     }
   }
 
+  /**
+   * @param {Iterable<[number, number]>} symbolFrequencies
+   * @return {[number, number][]}
+   */
   static frequenciesToLengths(symbolFrequencies) {
-    const symbols = [...symbolFrequencies].map(([value, frequency]) => ({
-      value: value,
+    const symbols = [...symbolFrequencies].map(/** @return {HuffmanFrequency} */ ([value, frequency]) => ({
+      value,
       p: Rational.from(frequency),
       parent: null,
     }));
@@ -53,7 +61,7 @@ export class Huffman {
     while (queue.length > 1) {
       const c2 = queue.pop();
       const c1 = queue.pop();
-      const parent = { value: null, p: c1.p.add(c2.p), parent: null };
+      /** @type {HuffmanFrequency} */ const parent = { value: null, p: c1.p.add(c2.p), parent: null };
       c1.parent = c2.parent = parent;
       // binary search for new location
       let p1 = 0;
@@ -78,10 +86,15 @@ export class Huffman {
     });
   }
 
+  /** @param {Iterable<[number, number]>} symbolFrequencies */
   static fromFrequencies(symbolFrequencies) {
     return new Huffman(Huffman.frequenciesToLengths(symbolFrequencies));
   }
 
+  /**
+   * @param {{ writeBits(bits: (1 | 0)[]): void }} encoder
+   * @param {number} value
+   */
   write(encoder, value) {
     const symbol = this.symbols.get(value);
     if (!symbol) {
@@ -90,6 +103,7 @@ export class Huffman {
     encoder.writeBits(symbol.pattern);
   }
 
+  /** @param {{ readBit(): boolean }} decoder */
   read(decoder) {
     let from = 0;
     let to = this.sorted.length;
@@ -123,6 +137,10 @@ export class Huffman {
 }
 
 export class Rational {
+  /**
+   * @param {number} num
+   * @param {number} den
+   */
   constructor(num, den = 1) {
     if (den < 0) {
       this.num = -num;
@@ -136,6 +154,7 @@ export class Rational {
     }
   }
 
+  /** @param {number | Rational} v */
   static from(v) {
     if (v instanceof Rational) {
       return v;
@@ -154,10 +173,12 @@ export class Rational {
     this.den /= d;
   }
 
+  /** @param {Rational} b */
   compare(b) {
     return this.num * b.den - b.num * this.den;
   }
 
+  /** @param {Rational} b */
   add(b) {
     return new Rational(this.num * b.den + b.num * this.den, this.den * b.den);
   }
@@ -171,6 +192,10 @@ export class Rational {
   }
 }
 
+/**
+ * @param {number} a
+ * @param {number} b
+ */
 function gcd(a, b) {
   while (b) {
     const t = b;

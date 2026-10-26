@@ -72,6 +72,7 @@ export class Preview {
     this._removePointerEvents();
   }
 
+  /** @param {PointerEvent} e */
   _md(e) {
     if (this.dragging) {
       return;
@@ -85,6 +86,7 @@ export class Preview {
     this._mm(e);
   }
 
+  /** @param {PointerEvent} e */
   _mm(e) {
     if (e.pointerId !== this.dragging.pointer) {
       return;
@@ -104,6 +106,7 @@ export class Preview {
     }
   }
 
+  /** @param {PointerEvent} e */
   _mu(e) {
     if (e.pointerId !== this.dragging.pointer) {
       return;
@@ -112,6 +115,7 @@ export class Preview {
     this._removePointerEvents();
   }
 
+  /** @param {PointerEvent} e */
   _mc(e) {
     if (e.pointerId !== this.dragging.pointer) {
       return;
@@ -119,6 +123,7 @@ export class Preview {
     this._removePointerEvents();
   }
 
+  /** @param {ImageBitmapSource} canvas */
   async setTextureFrom(canvas) {
     if (this.imageBitmap) {
       this.imageBitmap.close();
@@ -221,6 +226,7 @@ export class Preview {
     this.stitchProgOrigin = ctx.getUniformLocation(this.stitchProg, 'origin');
     this.stitchProgDelta = ctx.getUniformLocation(this.stitchProg, 'delta');
     this.stitchProgDesignOrigin = ctx.getUniformLocation(this.stitchProg, 'designOrigin');
+    this.stitchProgDesignSize = ctx.getUniformLocation(this.stitchProg, 'designSize');
     this.stitchProgDesignDelta = ctx.getUniformLocation(this.stitchProg, 'designDelta');
     this.stitchProgSize = ctx.getUniformLocation(this.stitchProg, 'size');
     this.stitchProgStitch = ctx.getUniformLocation(this.stitchProg, 'stitch');
@@ -291,8 +297,8 @@ export class Preview {
     ctx.uniform1i(this.stitchProgDimX, nx);
     ctx.uniform2f(this.stitchProgOrigin, (xx - ox) * sx, (yy - oy) * sy);
     ctx.uniform2f(this.stitchProgDelta, sx, sy);
-    ctx.uniform2f(this.stitchProgDesignOrigin, (xx / this.designW) % 1, (yy / this.designH) % 1);
-    ctx.uniform2f(this.stitchProgDesignDelta, 1 / this.designW, 1 / this.designH);
+    ctx.uniform2i(this.stitchProgDesignOrigin, posmod(xx, this.designW), posmod(yy, this.designH));
+    ctx.uniform2i(this.stitchProgDesignSize, this.designW, this.designH);
     ctx.uniform2f(this.stitchProgSize, 2 * sx, 2 * sy);
 
     ctx.drawArraysInstanced(GL.TRIANGLE_STRIP, 0, 4, nx * ny);
@@ -307,19 +313,19 @@ precision mediump float;
 uniform int dimx;
 uniform vec2 origin;
 uniform vec2 delta;
-uniform vec2 designOrigin;
-uniform vec2 designDelta;
+uniform ivec2 designOrigin;
+uniform ivec2 designSize;
 uniform vec2 size;
 
 in vec2 pos;
 
 out vec2 stitchUV;
-out vec2 designUV;
+flat out ivec2 designUV;
 
 void main(void) {
   vec2 p = vec2(gl_InstanceID % dimx, gl_InstanceID / dimx);
   stitchUV = pos;
-  designUV = designOrigin + p * designDelta;
+  designUV = (designOrigin + ivec2(p)) % designSize;
   gl_Position = vec4(
     (origin + p * delta + (pos - 0.5) * size - 0.5) * vec2(2.0, -2.0),
     0.0,
@@ -334,10 +340,16 @@ uniform sampler2D stitch;
 uniform sampler2D design;
 
 in vec2 stitchUV;
-in vec2 designUV;
+flat in ivec2 designUV;
 out vec4 col;
 
 void main(void) {
-  vec3 c = texture(stitch, stitchUV).xyz * (texture(design, designUV).xyz * 0.9 + 0.1);
+  vec3 c = texture(stitch, stitchUV).xyz * (texelFetch(design, designUV, 0).xyz * 0.9 + 0.1);
   col = vec4(pow(c, vec3(0.7)) * 1.05, 1.0);
 }`;
+
+/**
+ * @param {number} a
+ * @param {number} b
+ */
+const posmod = (a, b) => ((a % b) + b) % b;

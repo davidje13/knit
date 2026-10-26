@@ -2,7 +2,7 @@ import { B64 } from './base64.mjs';
 
 export class BitEncoder {
   constructor() {
-    this.sextets = [];
+    /** @type {string[]} */ this.sextets = [];
     this.cur = 0;
     this.bit = 0b00100000;
   }
@@ -16,6 +16,7 @@ export class BitEncoder {
     return this.sextets.join('');
   }
 
+  /** @param {boolean | 1 | 0} value */
   writeBit(value) {
     if (value) {
       this.cur |= this.bit;
@@ -28,6 +29,7 @@ export class BitEncoder {
     }
   }
 
+  /** @param {(boolean | 1 | 0)[]} value */
   writeBits(value) {
     for (const bit of value) {
       this.writeBit(bit);
@@ -42,13 +44,17 @@ export class BitEncoder {
     }
   }
 
+  /**
+   * @param {number} value
+   * @param {number} bits
+   */
   writeBinary(value, bits) {
     if (value < 0 || value >= (1 << bits)) {
       throw new Error(`value ${value} out of bounds (${bits}-bit unsigned)`);
     }
     let mask = 1 << (bits - 1);
     for (let i = 0; i < bits; ++ i) {
-      this.writeBit(value & mask);
+      this.writeBit(Boolean(value & mask));
       mask >>= 1;
     }
   }

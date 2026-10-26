@@ -4,6 +4,7 @@ import { mirrorX, mirrorY, transpose, shift } from './actions.mjs';
 import { el, makeButton } from './dom.mjs';
 
 export class EditorPage extends EventTarget {
+  /** @param {{ width: number; height: number; cellWidth: number; cellHeight: number; palette: number[] }} options */
   constructor({ width, height, cellWidth, cellHeight, palette }) {
     super();
 
@@ -42,6 +43,7 @@ export class EditorPage extends EventTarget {
       fill: 0,
     }));
 
+    /** @param {import('./actions.mjs').ImageAction[]} actions */
     const applyAction = (...actions) => {
       let d = this.editorView.getGrid();
       for (const action of actions) {
@@ -51,7 +53,7 @@ export class EditorPage extends EventTarget {
     };
 
     this.palettePicker = el('div');
-    const pickers = [];
+    /** @type {{ btn: HTMLElement, fn: () => void }[]} */ const pickers = [];
 
     const updatePalette = () => {
       for (const { btn, fn } of pickers) {
@@ -109,6 +111,7 @@ export class EditorPage extends EventTarget {
     this.editorView.fill(0);
   }
 
+  /** @param {number[]} palette */
   setPalette(palette) {
     this.palette = palette;
     if (this.activePalette >= this.palette.length) {
@@ -117,6 +120,7 @@ export class EditorPage extends EventTarget {
     this._updatePalette();
   }
 
+  /** @param {string} url */
   setReferenceImage(url) {
     this.editorView.setReferenceImage(url);
   }
@@ -125,6 +129,7 @@ export class EditorPage extends EventTarget {
     return this.editorView.getGrid();
   }
 
+  /** @param {import('./GridView.mjs').Image} grid */
   setGrid(grid) {
     this.editorView.setGrid(grid);
   }
