@@ -1,8 +1,12 @@
 const VIS_DEC = ['', '|', '/\\'];
 const VIS_INC = ['', '|', "|'"];
 
-const iHave = /** @type {HTMLInputElement} */ (document.getElementsByName('have')[0]);
-const iNeed = /** @type {HTMLInputElement} */ (document.getElementsByName('need')[0]);
+const iHave = /** @type {HTMLInputElement} */ (
+	document.getElementsByName('have')[0]
+);
+const iNeed = /** @type {HTMLInputElement} */ (
+	document.getElementsByName('need')[0]
+);
 const oResult = document.getElementById('result');
 
 function update() {
