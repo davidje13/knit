@@ -1,72 +1,23 @@
 <!doctype html>
 <html lang="en">
 	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="format-detection" content="telephone=no" />
+		<script type="module" src="./index.mjs"></script>
 		<title>Stitches - Knitting Tools</title>
-		<script>
-			const VIS_DEC = ['', '|', '/\\'];
-			const VIS_INC = ['', '|', "|'"];
-
-			window.addEventListener('DOMContentLoaded', () => {
-				const iHave = document.getElementsByName('have')[0];
-				const iNeed = document.getElementsByName('need')[0];
-				const oResult = document.getElementById('result');
-
-				function update() {
-					const have = Number.parseInt(iHave.value);
-					const need = Number.parseInt(iNeed.value);
-					const from = Math.max(have, need);
-					const to = Math.min(have, need);
-					if (from > to * 2) {
-						oResult.innerText = '-';
-						return;
-					}
-
-					const ys = [];
-					let D = -from;
-					let y = 0;
-					for (let x = 0; x < from; ++x) {
-						D += 2 * to;
-						ys.push(y);
-						if (D > 0) {
-							++y;
-							D -= 2 * from;
-						}
-					}
-					ys.push(-1);
-					const result = [];
-					let n = 0;
-					let cury = 0;
-					for (const y of ys) {
-						if (y === cury) {
-							++n;
-						} else {
-							result.push(n);
-							n = 1;
-							cury = y;
-						}
-					}
-					const vis = need > have ? VIS_INC : VIS_DEC;
-					oResult.innerText = result.map((n) => vis[n]).join('');
-				}
-
-				for (const i of [iHave, iNeed]) {
-					i.addEventListener('input', update);
-				}
-				update();
-			});
-		</script>
 	</head>
 	<body>
 		<form action="#">
-			<label
-				>I <em>have</em>
-				<input name="have" type="number" min="1" value="100" /> stitches</label
-			>
+			<label>
+				I <em>have</em>
+				<input name="have" type="number" min="1" value="100" /> stitches
+			</label>
 			<br />
-			<label
-				>I <em>need</em>
-				<input name="need" type="number" min="1" value="100" /> stitches</label
-			>
+			<label>
+				I <em>need</em>
+				<input name="need" type="number" min="1" value="100" /> stitches
+			</label>
 			<br />
 			<pre id="result"></pre>
 		</form>

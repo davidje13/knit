@@ -5,13 +5,16 @@ import terser from '@rollup/plugin-terser';
 
 const basedir = dirname(fileURLToPath(import.meta.url));
 
-export default [
-	{
-		input: join(basedir, 'web', 'script', 'pattern', 'index.mjs'),
-		output: {
-			file: join(basedir, 'build', 'static', 'pattern', 'index.mjs'),
-			format: 'esm',
-		},
-		plugins: [nodeResolve(), terser()],
-	},
+const paths = [
+	['pattern', 'index.mjs'],
+	['stitches', 'index.mjs'],
 ];
+
+export default paths.map((p) => ({
+	input: join(basedir, 'web', 'script', ...p),
+	output: {
+		file: join(basedir, 'build', 'static', ...p),
+		format: 'esm',
+	},
+	plugins: [nodeResolve(), terser()],
+}));
