@@ -1,23 +1,38 @@
-/** @typedef {{ value: number, length: number, pattern: (1 | 0)[] | null }} HuffmanEntry */
-/** @typedef {{ value: number | null; p: Rational; parent: HuffmanFrequency | null }} HuffmanFrequency */
+interface HuffmanEntry<T> {
+	value: T;
+	length: number;
+	pattern: (1 | 0)[];
+}
 
-export class Huffman {
-	/** @param {[number, number][]} symbolLengths */
-	constructor(symbolLengths) {
-		/** @type {Map<number, HuffmanEntry>} */ this.symbols = new Map();
+interface HuffmanFrequency<T> {
+	value: T;
+	p: Rational;
+	parent: HuffmanFrequency<T> | null;
+}
+
+type SymbolFrequency<T> = [T, number];
+type SymbolLength<T> = [T, number];
+
+export class Huffman<T> {
+	private readonly symbols = new Map<T, HuffmanEntry<T>>();
+	private readonly sorted: HuffmanEntry<T>[] = [];
+
+	constructor(symbolLengths: SymbolLength<T>[]) {
 		for (const [value, length] of symbolLengths) {
 			if (length) {
-				this.symbols.set(value, { value, length, pattern: null });
+				this.symbols.set(value, {
+					value,
+					length,
+					pattern: null as any, // set later in this constructor
+				});
 			}
 		}
 		if (this.symbols.size === 1) {
 			// special case: if there is only one symbol, its length is ignored and set to 0 because nothing else can be encoded
-			this.symbols.values().next().value.length = 0;
+			this.symbols.values().next().value!.length = 0;
 		}
 
-		/** @type {HuffmanEntry[]} */ this.sorted = [];
-
-		/** @type {(1 | 0)[]} */ const v = [];
+		const v: (1 | 0)[] = [];
 		// shorter codes first (sort is stable so order of elements is otherwise maintained)
 		for (const symbol of [...this.symbols.values()].sort(
 			(a, b) => a.length - b.length,
@@ -40,32 +55,30 @@ export class Huffman {
 		}
 	}
 
-	/**
-	 * @param {Iterable<[number, number]>} symbolFrequencies
-	 * @return {[number, number][]}
-	 */
-	static frequenciesToLengths(symbolFrequencies) {
+	static frequenciesToLengths<T>(
+		symbolFrequencies: Iterable<SymbolFrequency<T>>,
+	) {
 		const symbols = [...symbolFrequencies].map(
-			/** @return {HuffmanFrequency} */ ([value, frequency]) => ({
+			([value, frequency]): HuffmanFrequency<T> => ({
 				value,
 				p: Rational.from(frequency),
 				parent: null,
 			}),
 		);
 
-		const queue = symbols
+		const queue: HuffmanFrequency<T | null>[] = symbols
 			.filter((symbol) => symbol.p.compare(Rational.ZERO) > 0)
 			.sort((a, b) => b.p.compare(a.p)); // low p at end
 
 		if (queue.length === 1) {
 			// special case: only one symbol - it will be encoded in 0 bits,
 			// but we must record that it exists, which we do by giving it a non-zero length
-			queue.pop().parent = { value: null, p: Rational.ZERO, parent: null };
+			queue.pop()!.parent = { value: null, p: Rational.ZERO, parent: null };
 		}
 		while (queue.length > 1) {
-			const c2 = queue.pop();
-			const c1 = queue.pop();
-			/** @type {HuffmanFrequency} */ const parent = {
+			const c2 = queue.pop()!;
+			const c1 = queue.pop()!;
+			const parent: HuffmanFrequency<null> = {
 				value: null,
 				p: c1.p.add(c2.p),
 				parent: null,
@@ -76,7 +89,7 @@ export class Huffman {
 			let p2 = queue.length;
 			while (p2 > p1) {
 				const p = (p1 + p2) >>> 1;
-				if (queue[p].p.compare(parent.p) > 0) {
+				if (queue[p]!.p.compare(parent.p) > 0) {
 					p1 = p + 1;
 				} else {
 					p2 = p;
@@ -85,7 +98,7 @@ export class Huffman {
 			queue.splice(p1, 0, parent);
 		}
 
-		return symbols.map((symbol) => {
+		return symbols.map((symbol): SymbolLength<T> => {
 			let length = 0;
 			for (let s = symbol; s.parent; s = s.parent) {
 				++length;
@@ -94,16 +107,11 @@ export class Huffman {
 		});
 	}
 
-	/** @param {Iterable<[number, number]>} symbolFrequencies */
-	static fromFrequencies(symbolFrequencies) {
+	static fromFrequencies<T>(symbolFrequencies: Iterable<SymbolFrequency<T>>) {
 		return new Huffman(Huffman.frequenciesToLengths(symbolFrequencies));
 	}
 
-	/**
-	 * @param {{ writeBits(bits: (1 | 0)[]): void }} encoder
-	 * @param {number} value
-	 */
-	write(encoder, value) {
+	write(encoder: { writeBits(bits: (1 | 0)[]): void }, value: T) {
 		const symbol = this.symbols.get(value);
 		if (!symbol) {
 			throw new Error(`unknown symbol ${value}`);
@@ -111,8 +119,7 @@ export class Huffman {
 		encoder.writeBits(symbol.pattern);
 	}
 
-	/** @param {{ readBit(): boolean }} decoder */
-	read(decoder) {
+	read(decoder: { readBit(): boolean }) {
 		let from = 0;
 		let to = this.sorted.length;
 		for (let i = 0; to > from + 1; ++i) {
@@ -120,7 +127,7 @@ export class Huffman {
 			let p2 = to;
 			while (p2 > p1) {
 				const p = (p1 + p2) >>> 1;
-				if (this.sorted[p].pattern[i]) {
+				if (this.sorted[p]!.pattern[i]) {
 					p2 = p;
 				} else {
 					p1 = p + 1;
@@ -132,7 +139,7 @@ export class Huffman {
 				to = p1;
 			}
 		}
-		return this.sorted[from].value;
+		return this.sorted[from]!.value;
 	}
 
 	toString() {
@@ -147,11 +154,10 @@ export class Huffman {
 }
 
 export class Rational {
-	/**
-	 * @param {number} num
-	 * @param {number} den
-	 */
-	constructor(num, den = 1) {
+	declare private num: number;
+	declare private den: number;
+
+	constructor(num: number, den = 1) {
 		if (den < 0) {
 			this.num = -num;
 			this.den = -den;
@@ -164,8 +170,7 @@ export class Rational {
 		}
 	}
 
-	/** @param {number | Rational} v */
-	static from(v) {
+	static from(v: number | Rational) {
 		if (v instanceof Rational) {
 			return v;
 		} else if (typeof v === 'number') {
@@ -183,13 +188,11 @@ export class Rational {
 		this.den /= d;
 	}
 
-	/** @param {Rational} b */
-	compare(b) {
+	compare(b: Rational) {
 		return this.num * b.den - b.num * this.den;
 	}
 
-	/** @param {Rational} b */
-	add(b) {
+	add(b: Rational) {
 		return new Rational(this.num * b.den + b.num * this.den, this.den * b.den);
 	}
 
@@ -202,11 +205,7 @@ export class Rational {
 	}
 }
 
-/**
- * @param {number} a
- * @param {number} b
- */
-function gcd(a, b) {
+function gcd(a: number, b: number) {
 	while (b) {
 		const t = b;
 		b = a % b;

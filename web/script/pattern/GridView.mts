@@ -1,24 +1,44 @@
-import { el } from './dom.mjs';
+import { el } from './dom.mts';
 
 const cGridMinor = '#80808033';
 const cGridMajor = '#80808099';
 
-/** @typedef {{ width: number; height: number; data: Uint8Array }} Image */
+export interface Image {
+	width: number;
+	height: number;
+	data: Uint8Array;
+}
+
+type GetChange = (current: number, alt: boolean) => number | null | undefined;
 
 export class GridView extends EventTarget {
-	/**
-	 * @param {{
-	 *   width?: number;
-	 *   height?: number;
-	 *   majorX?: number;
-	 *   majorY?: number;
-	 *   cellWidth: number;
-	 *   cellHeight: number;
-	 *   border?: number;
-	 *   fill?: number;
-	 *   getChange?: (current: number, alt: boolean) => (number | null | undefined);
-	 * }} options
-	 */
+	declare private readonly dpr: number;
+	private w = 0;
+	private h = 0;
+	private lastw = -1;
+	private lasth = -1;
+	declare private readonly cw: number;
+	declare private readonly ch: number;
+	declare private readonly getChange: GetChange;
+	declare private readonly border: number;
+	declare private readonly majorX: number;
+	declare private readonly majorY: number;
+	private values = new Uint8Array(0);
+	private palette: string[] = [];
+	private dirty = false;
+	private _readonly = false;
+	private updating: { pointer: number; value: number } | null = null;
+
+	declare readonly canvas: HTMLCanvasElement;
+	declare private readonly ctx: CanvasRenderingContext2D;
+
+	declare private readonly referenceImage: HTMLDivElement;
+
+	declare private readonly gridCanvas: HTMLCanvasElement;
+	declare private readonly gridCtx: CanvasRenderingContext2D;
+
+	declare readonly container: HTMLElement;
+
 	constructor({
 		width = 0,
 		height = 0,
@@ -29,13 +49,19 @@ export class GridView extends EventTarget {
 		border = 2,
 		fill = 0,
 		getChange = () => null,
+	}: {
+		width?: number;
+		height?: number;
+		majorX?: number;
+		majorY?: number;
+		cellWidth: number;
+		cellHeight: number;
+		border?: number;
+		fill?: number;
+		getChange?: GetChange;
 	}) {
 		super();
 		this.dpr = Math.min(2, window.devicePixelRatio || 1);
-		this.w = 0;
-		this.h = 0;
-		this.lastw = -1;
-		this.lasth = -1;
 		this.cw = cellWidth * this.dpr;
 		this.ch = cellHeight * this.dpr;
 		this.getChange = getChange;
@@ -43,16 +69,12 @@ export class GridView extends EventTarget {
 		this.majorX = majorX;
 		this.majorY = majorY;
 		this.values = new Uint8Array(0);
-		/** @type {string[]} */ this.palette = [];
-		this.dirty = false;
-		this._readonly = false;
-		this.updating = null;
 
 		this.canvas = el('canvas', { class: 'grid-view-image' });
 		this.ctx = this.canvas.getContext('2d', {
 			alpha: false,
 			willReadFrequently: true,
-		});
+		})!;
 
 		this.referenceImage = el('div', { class: 'grid-view-reference' });
 
@@ -60,7 +82,7 @@ export class GridView extends EventTarget {
 		this.gridCtx = this.gridCanvas.getContext('2d', {
 			alpha: true,
 			willReadFrequently: false,
-		});
+		})!;
 
 		this.container = el('div', { class: 'grid-view' }, [
 			this.canvas,
@@ -82,13 +104,12 @@ export class GridView extends EventTarget {
 		this.resize({ width, height, fill });
 	}
 
-	/** @param {number[]} palette */
-	setPalette(palette) {
+	setPalette(palette: number[]) {
 		this.palette = palette.map((p) => '#' + p.toString(16).padStart(6, '0'));
 		this._markDirty();
 	}
 
-	_removePointerEvents() {
+	private _removePointerEvents() {
 		if (this.updating) {
 			window.removeEventListener('pointermove', this._mm);
 			window.removeEventListener('pointerup', this._mu);
@@ -112,8 +133,7 @@ export class GridView extends EventTarget {
 		this._readonly = readonly;
 	}
 
-	/** @param {PointerEvent} e */
-	_getCell(e) {
+	private _getCell(e: PointerEvent) {
 		const bounds = this.container.getBoundingClientRect();
 		const x = Math.floor(((e.clientX - bounds.left) * this.dpr) / this.cw);
 		const y = Math.floor(((e.clientY - bounds.top) * this.dpr) / this.ch);
@@ -123,8 +143,7 @@ export class GridView extends EventTarget {
 		return { x, y };
 	}
 
-	/** @param {PointerEvent} e */
-	_md(e) {
+	private _md(e: PointerEvent) {
 		if (this.updating || this._readonly) {
 			return;
 		}
@@ -134,7 +153,7 @@ export class GridView extends EventTarget {
 			return;
 		}
 		const updated = this.getChange(
-			this.values[c.y * this.w + c.x],
+			this.values[c.y * this.w + c.x]!,
 			e.button > 0 || e.altKey,
 		);
 		if (updated === undefined || updated === null) {
@@ -148,9 +167,8 @@ export class GridView extends EventTarget {
 		this._mm(e);
 	}
 
-	/** @param {PointerEvent} e */
-	_mm(e) {
-		if (e.pointerId !== this.updating.pointer || this._readonly) {
+	private _mm(e: PointerEvent) {
+		if (e.pointerId !== this.updating?.pointer || this._readonly) {
 			return;
 		}
 		e.preventDefault();
@@ -160,35 +178,38 @@ export class GridView extends EventTarget {
 		}
 	}
 
-	/** @param {PointerEvent} e */
-	_mu(e) {
-		if (e.pointerId !== this.updating.pointer) {
+	private _mu(e: PointerEvent) {
+		if (e.pointerId !== this.updating?.pointer) {
 			return;
 		}
 		this._mm(e);
 		this._removePointerEvents();
 	}
 
-	/** @param {PointerEvent} e */
-	_mc(e) {
-		if (e.pointerId !== this.updating.pointer) {
+	private _mc(e: PointerEvent) {
+		if (e.pointerId !== this.updating?.pointer) {
 			return;
 		}
 		this._removePointerEvents();
 	}
 
-	/** @param {string} url */
-	setReferenceImage(url) {
+	setReferenceImage(url: string) {
 		this.referenceImage.style.backgroundImage = url ? `url(${url})` : 'none';
 	}
 
-	/** @return {Image} */
-	getGrid() {
+	getGrid(): Image {
 		return { width: this.w, height: this.h, data: this.values };
 	}
 
-	/** @param {{ width: number, height: number, data: ArrayLike<number> }} options */
-	setGrid({ width, height, data }) {
+	setGrid({
+		width,
+		height,
+		data,
+	}: {
+		width: number;
+		height: number;
+		data: ArrayLike<number>;
+	}) {
 		if (width <= 0 || height <= 0) {
 			throw new Error('invalid size');
 		}
@@ -215,12 +236,7 @@ export class GridView extends EventTarget {
 		this._markDirty();
 	}
 
-	/**
-	 * @param {number} x
-	 * @param {number} y
-	 * @param {number} value
-	 */
-	setCell(x, y, value) {
+	setCell(x: number, y: number, value: number) {
 		const p = y * this.w + x;
 		if (this.values[p] !== value) {
 			this.values[p] = value;
@@ -231,20 +247,23 @@ export class GridView extends EventTarget {
 		}
 	}
 
-	/**
-	 * @param {{
-	 *   width?: number | null;
-	 *   height?: number | null;
-	 *   fill?: number;
-	 *   dx?: number;
-	 *   dy?: number;
-	 * }} options
-	 */
-	resize({ width = null, height = null, fill = 0, dx = 0, dy = 0 }) {
+	resize({
+		width = null,
+		height = null,
+		fill = 0,
+		dx = 0,
+		dy = 0,
+	}: {
+		width?: number | null;
+		height?: number | null;
+		fill?: number;
+		dx?: number;
+		dy?: number;
+	}) {
 		const oldW = this.w;
 		const oldH = this.h;
 		const oldValues = this.values;
-		if (width < 0 || height < 0) {
+		if ((width && width < 0) || (height && height < 0)) {
 			throw new Error('invalid size');
 		}
 		this.w = width ?? oldW;
@@ -256,7 +275,7 @@ export class GridView extends EventTarget {
 				for (let x = 0; x < this.w; ++x) {
 					const ox = x - dx;
 					if (ox >= 0 && ox < oldW) {
-						this.values[y * this.w + x] = oldValues[oy * oldW + ox];
+						this.values[y * this.w + x] = oldValues[oy * oldW + ox]!;
 					} else {
 						this.values[y * this.w + x] = fill;
 					}
@@ -271,14 +290,14 @@ export class GridView extends EventTarget {
 		this._markDirty();
 	}
 
-	_markDirty() {
+	private _markDirty() {
 		if (!this.dirty) {
 			this.dirty = true;
 			Promise.resolve().then(() => this._draw());
 		}
 	}
 
-	_drawGrid() {
+	private _drawGrid() {
 		const { w, h, cw, ch, border, majorX, majorY } = this;
 
 		const fullWidth = w * cw;
@@ -294,7 +313,7 @@ export class GridView extends EventTarget {
 		}
 	}
 
-	_draw() {
+	private _draw() {
 		if (!this.dirty) {
 			return;
 		}
@@ -320,7 +339,7 @@ export class GridView extends EventTarget {
 
 		for (let y = 0; y < h; ++y) {
 			for (let x = 0; x < w; ++x) {
-				this.ctx.fillStyle = this.palette[this.values[y * w + x]];
+				this.ctx.fillStyle = this.palette[this.values[y * w + x]!]!;
 				this.ctx.fillRect(x, y, 1, 1);
 			}
 		}
@@ -328,7 +347,6 @@ export class GridView extends EventTarget {
 	}
 }
 
-/** @param {Event} e */
-function prevent(e) {
+function prevent(e: Event) {
 	e.preventDefault();
 }

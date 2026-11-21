@@ -1,38 +1,25 @@
-import { el } from './dom.mjs';
+import { el } from './dom.mts';
 
-const DIRECTIONS = [
-	{ className: 'n', x: 0, y: -1 },
-	{ className: 'w', x: -1, y: 0 },
-	{ className: 's', x: 0, y: 1 },
-	{ className: 'e', x: 1, y: 0 },
-	{ className: 'nw', x: -1, y: -1 },
-	{ className: 'ne', x: 1, y: -1 },
-	{ className: 'sw', x: -1, y: 1 },
-	{ className: 'se', x: 1, y: 1 },
-];
+export class Resizer extends (EventTarget as TypedEventTarget<{
+	change: { detail: { width: number; height: number; dx: number; dy: number } };
+}>) {
+	declare private readonly _getCurrentSize: GetSize;
+	declare private readonly _getLabel: GetLabel;
+	declare private readonly xScale: number;
+	declare private readonly yScale: number;
+	declare private readonly xMin: number;
+	declare private readonly yMin: number;
+	declare private readonly xMax: number;
+	declare private readonly yMax: number;
+	private dragState: DragState | null = null;
+	declare readonly container: HTMLElement;
+	declare private readonly previewLabel: HTMLElement;
+	declare private readonly preview: HTMLElement;
+	declare private readonly wrapper: HTMLElement;
+	private readonly handles: HTMLElement[] = [];
 
-/**
- * @typedef {(TypedEventTarget<{
- *   change: { detail: { width: number; height: number; dx: number; dy: number } };
- * }>)} ResizerEventTarget
- */
-
-export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
-	/**
-	 * @param {HTMLElement} content
-	 * @param {{
-	 *   getCurrentSize?: () => ({ width: number, height: number });
-	 *   getLabel?: (width: number, height: number) => string;
-	 *   xScale?: number;
-	 *   yScale?: number;
-	 *   xMin?: number;
-	 *   yMin?: number;
-	 *   xMax?: number;
-	 *   yMax?: number;
-	 * }} options
-	 */
 	constructor(
-		content,
+		content: HTMLElement,
 		{
 			getCurrentSize = () => content.getBoundingClientRect(),
 			getLabel = (w, h) => `${w}\u00D7${h}`,
@@ -42,6 +29,15 @@ export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
 			yMin = 0,
 			xMax = Number.POSITIVE_INFINITY,
 			yMax = Number.POSITIVE_INFINITY,
+		}: {
+			getCurrentSize?: GetSize;
+			getLabel?: GetLabel;
+			xScale?: number;
+			yScale?: number;
+			xMin?: number;
+			yMin?: number;
+			xMax?: number;
+			yMax?: number;
 		} = {},
 	) {
 		super();
@@ -54,7 +50,6 @@ export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
 		this.yMin = yMin;
 		this.xMax = xMax;
 		this.yMax = yMax;
-		this.dragState = null;
 
 		this.container = el('div', { class: 'resizer' });
 
@@ -64,10 +59,9 @@ export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
 		this._mu = this._mu.bind(this);
 		this._mc = this._mc.bind(this);
 
-		this.handles = [];
 		for (let i = 0; i < DIRECTIONS.length; ++i) {
-			const handle = el('div', { class: `handle ${DIRECTIONS[i].className}` });
-			handle.dataset.resizeIndex = String(i);
+			const handle = el('div', { class: `handle ${DIRECTIONS[i]!.className}` });
+			handle.dataset['resizeIndex'] = String(i);
 			handle.addEventListener('pointerdown', this._md, { passive: false });
 			handle.addEventListener('contextmenu', prevent, { passive: false });
 			this.container.append(handle);
@@ -82,7 +76,7 @@ export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
 		this.container.append(this.wrapper);
 	}
 
-	_removePointerEvents() {
+	private _removePointerEvents() {
 		window.removeEventListener('pointermove', this._mm);
 		window.removeEventListener('keydown', this._mmk);
 		window.removeEventListener('keyup', this._mmk);
@@ -102,10 +96,9 @@ export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
 		this._removePointerEvents();
 	}
 
-	/** @param {PointerEvent} e */
-	_md(e) {
-		const handle = /** @type {HTMLElement} */ (e.target);
-		const index = handle.dataset?.resizeIndex;
+	private _md(e: PointerEvent) {
+		const handle = e.target as HTMLElement;
+		const index = handle.dataset?.['resizeIndex'];
 		if (index === undefined || e.button !== 0 || this.dragState !== null) {
 			return;
 		}
@@ -125,7 +118,7 @@ export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
 			},
 			latest: { x: e.clientX, y: e.clientY, altKey: e.altKey },
 			handle,
-			mode: DIRECTIONS[Number(index)],
+			mode: DIRECTIONS[Number(index)]!,
 		};
 		window.addEventListener('pointermove', this._mm, { passive: false });
 		window.addEventListener('keydown', this._mmk, { passive: true });
@@ -136,8 +129,7 @@ export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
 		this._mm(e);
 	}
 
-	_updatePreview() {
-		const { start, latest, mode } = this.dragState;
+	private _updatePreview({ start, latest, mode }: DragState) {
 		const mult = latest.altKey ? 2 : 1;
 		const xDiff =
 			Math.round((latest.x - start.x) / this.xScale) * mult * mode.x;
@@ -164,31 +156,28 @@ export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
 		return { w, h, dx, dy };
 	}
 
-	/** @param {PointerEvent} e */
-	_mm(e) {
-		if (e.pointerId !== this.dragState.pointer) {
+	private _mm(e: PointerEvent) {
+		if (e.pointerId !== this.dragState?.pointer) {
 			return;
 		}
 		e.preventDefault();
 		this.dragState.latest = { x: e.clientX, y: e.clientY, altKey: e.altKey };
-		this._updatePreview();
+		this._updatePreview(this.dragState);
 	}
 
-	/** @param {KeyboardEvent} e */
-	_mmk(e) {
-		if (this.dragState.latest.altKey !== e.altKey) {
+	private _mmk(e: KeyboardEvent) {
+		if (this.dragState && this.dragState.latest.altKey !== e.altKey) {
 			this.dragState.latest.altKey = e.altKey;
-			this._updatePreview();
+			this._updatePreview(this.dragState);
 		}
 	}
 
-	/** @param {PointerEvent} e */
-	_mu(e) {
-		if (e.pointerId !== this.dragState.pointer) {
+	private _mu(e: PointerEvent) {
+		if (e.pointerId !== this.dragState?.pointer) {
 			return;
 		}
 		this.dragState.latest = { x: e.clientX, y: e.clientY, altKey: e.altKey };
-		const { w, h, dx, dy } = this._updatePreview();
+		const { w, h, dx, dy } = this._updatePreview(this.dragState);
 		const { start } = this.dragState;
 		this._removePointerEvents();
 		this.preview.style.display = 'none';
@@ -212,9 +201,8 @@ export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
 		}
 	}
 
-	/** @param {PointerEvent} e */
-	_mc(e) {
-		if (e.pointerId !== this.dragState.pointer) {
+	private _mc(e: PointerEvent) {
+		if (e.pointerId !== this.dragState?.pointer) {
 			return;
 		}
 		this._removePointerEvents();
@@ -227,31 +215,62 @@ export class Resizer extends /** @type {ResizerEventTarget} */ (EventTarget) {
 	}
 }
 
-/** @param {Event} e */
-function prevent(e) {
+function prevent(e: Event) {
 	e.preventDefault();
 }
 
-/**
- * @template {Event} T
- * @typedef {(e: T) => void} TypedEventListener
- */
+interface Direction {
+	className: string;
+	x: number;
+	y: number;
+}
 
-/**
- * @template {Event} T
- * @typedef {{ handleEvent(e: T): void }} TypedEventListenerObject
- */
+interface DragState {
+	pointer: number;
+	start: {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+		padX: number;
+		padY: number;
+	};
+	latest: { x: number; y: number; altKey: boolean };
+	handle: HTMLElement;
+	mode: Direction;
+}
 
-/**
- * @template {Event} T
- * @typedef {TypedEventListener<T> | TypedEventListenerObject<T>} TypedEventListenerOrEventListenerObject
- */
+type GetSize = () => { width: number; height: number };
+type GetLabel = (width: number, height: number) => string;
 
-/**
- * @template {Record<string, unknown>} T
- * @typedef {{ new(): {
- *   addEventListener<const K extends keyof T>(type: K, listener: TypedEventListenerOrEventListenerObject<Event & T[K]>, options?: AddEventListenerOptions | boolean): void;
- *   removeEventListener(type: string, callback: EventListenerOrEventListenerObject | null, options?: EventListenerOptions | boolean): void;
- *   dispatchEvent(event: Event): boolean;
- * }}} TypedEventTarget
- */
+const DIRECTIONS: Direction[] = [
+	{ className: 'n', x: 0, y: -1 },
+	{ className: 'w', x: -1, y: 0 },
+	{ className: 's', x: 0, y: 1 },
+	{ className: 'e', x: 1, y: 0 },
+	{ className: 'nw', x: -1, y: -1 },
+	{ className: 'ne', x: 1, y: -1 },
+	{ className: 'sw', x: -1, y: 1 },
+	{ className: 'se', x: 1, y: 1 },
+];
+
+type TypedEventListener<T extends Event> = (e: T) => void;
+type TypedEventListenerObject<T extends Event> = { handleEvent(e: T): void };
+type TypedEventListenerOrEventListenerObject<T extends Event> =
+	TypedEventListener<T> | TypedEventListenerObject<T>;
+
+interface TypedEventTarget<T extends Record<string, unknown>> {
+	new (): {
+		addEventListener<const K extends keyof T>(
+			type: K,
+			listener: TypedEventListenerOrEventListenerObject<Event & T[K]>,
+			options?: AddEventListenerOptions | boolean,
+		): void;
+		removeEventListener(
+			type: string,
+			callback: EventListenerOrEventListenerObject | null,
+			options?: EventListenerOptions | boolean,
+		): void;
+		dispatchEvent(event: Event): boolean;
+	};
+}

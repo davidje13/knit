@@ -1,21 +1,44 @@
-import { el } from './dom.mjs';
+import { el } from './dom.mts';
 
 const GL = WebGL2RenderingContext;
 
 export class Preview {
-	constructor() {
-		this.dpr = Math.min(2, window.devicePixelRatio || 1);
-		this.dx = 0;
-		this.dy = 0;
-		this.scale = 16;
-		this.dragging = null;
-		this.imageBitmap = null;
-		this.stitchImageBitmap = null;
-		this.ready = false;
-		this.dirty = false;
-		this.designW = 1;
-		this.designH = 1;
+	private dpr = Math.min(2, window.devicePixelRatio || 1);
+	private dx = 0;
+	private dy = 0;
+	private readonly scale = 16;
+	private dragging: {
+		pointer: number;
+		x: number;
+		y: number;
+		dx0: number;
+		dy0: number;
+	} | null = null;
+	private ready = false;
+	private dirty = false;
+	private designW = 1;
+	private designH = 1;
+	private imageBitmap: ImageBitmap | null = null;
+	private stitchImageBitmap: ImageBitmap | null = null;
+	declare readonly canvas: HTMLCanvasElement;
+	declare private readonly ctx: WebGL2RenderingContext;
+	declare private stitchTex: WebGLTexture;
+	declare private designTex: WebGLTexture;
+	declare private vShader: WebGLShader;
+	declare private fShader: WebGLShader;
+	declare private stitchProg: WebGLProgram;
+	declare private stitchProgPos: number;
+	declare private stitchProgDimX: WebGLUniformLocation | null;
+	declare private stitchProgOrigin: WebGLUniformLocation | null;
+	declare private stitchProgDelta: WebGLUniformLocation | null;
+	declare private stitchProgDesignOrigin: WebGLUniformLocation | null;
+	declare private stitchProgDesignSize: WebGLUniformLocation | null;
+	declare private stitchProgDesignDelta: WebGLUniformLocation | null;
+	declare private stitchProgSize: WebGLUniformLocation | null;
+	declare private stitchProgStitch: WebGLUniformLocation | null;
+	declare private stitchProgDesign: WebGLUniformLocation | null;
 
+	constructor() {
 		this.canvas = el('canvas', { class: 'grid-view-image' });
 		this.canvas.addEventListener(
 			'webglcontextlost',
@@ -39,7 +62,7 @@ export class Preview {
 			stencil: false,
 			antialias: false,
 			preserveDrawingBuffer: false,
-		});
+		})!;
 
 		this._md = this._md.bind(this);
 		this._mm = this._mm.bind(this);
@@ -65,7 +88,7 @@ export class Preview {
 		stitch.src = './stitch.png';
 	}
 
-	_removePointerEvents() {
+	private _removePointerEvents() {
 		if (this.dragging) {
 			window.removeEventListener('pointermove', this._mm);
 			window.removeEventListener('pointerup', this._mu);
@@ -82,8 +105,7 @@ export class Preview {
 		this._removePointerEvents();
 	}
 
-	/** @param {PointerEvent} e */
-	_md(e) {
+	private _md(e: PointerEvent) {
 		if (this.dragging) {
 			return;
 		}
@@ -102,9 +124,8 @@ export class Preview {
 		this._mm(e);
 	}
 
-	/** @param {PointerEvent} e */
-	_mm(e) {
-		if (e.pointerId !== this.dragging.pointer) {
+	private _mm(e: PointerEvent) {
+		if (e.pointerId !== this.dragging?.pointer) {
 			return;
 		}
 		e.preventDefault();
@@ -122,25 +143,22 @@ export class Preview {
 		}
 	}
 
-	/** @param {PointerEvent} e */
-	_mu(e) {
-		if (e.pointerId !== this.dragging.pointer) {
+	private _mu(e: PointerEvent) {
+		if (e.pointerId !== this.dragging?.pointer) {
 			return;
 		}
 		this._mm(e);
 		this._removePointerEvents();
 	}
 
-	/** @param {PointerEvent} e */
-	_mc(e) {
-		if (e.pointerId !== this.dragging.pointer) {
+	private _mc(e: PointerEvent) {
+		if (e.pointerId !== this.dragging?.pointer) {
 			return;
 		}
 		this._removePointerEvents();
 	}
 
-	/** @param {ImageBitmapSource} canvas */
-	async setTextureFrom(canvas) {
+	async setTextureFrom(canvas: ImageBitmapSource) {
 		if (this.imageBitmap) {
 			this.imageBitmap.close();
 			this.imageBitmap = null;
@@ -150,7 +168,7 @@ export class Preview {
 		this.render();
 	}
 
-	_updateDesign() {
+	private _updateDesign() {
 		const ctx = this.ctx;
 		if (ctx.isContextLost() || !this.ready || !this.imageBitmap) {
 			return;
@@ -171,7 +189,7 @@ export class Preview {
 		);
 	}
 
-	_init() {
+	private _init() {
 		const ctx = this.ctx;
 		if (ctx.isContextLost()) {
 			console.error('cannot initialise: context lost');
@@ -213,11 +231,11 @@ export class Preview {
 		ctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
 		ctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
 
-		this.vShader = ctx.createShader(GL.VERTEX_SHADER);
+		this.vShader = ctx.createShader(GL.VERTEX_SHADER)!;
 		ctx.shaderSource(this.vShader, STITCH_VERTEX_SHADER);
 		ctx.compileShader(this.vShader);
 
-		this.fShader = ctx.createShader(GL.FRAGMENT_SHADER);
+		this.fShader = ctx.createShader(GL.FRAGMENT_SHADER)!;
 		ctx.shaderSource(this.fShader, STITCH_FRAGMENT_SHADER);
 		ctx.compileShader(this.fShader);
 
@@ -382,8 +400,4 @@ void main(void) {
   col = vec4(pow(c, vec3(0.7)) * 1.05, 1.0);
 }`;
 
-/**
- * @param {number} a
- * @param {number} b
- */
-const posmod = (a, b) => ((a % b) + b) % b;
+const posmod = (a: number, b: number) => ((a % b) + b) % b;

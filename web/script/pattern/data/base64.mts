@@ -1,7 +1,7 @@
 export const B64 =
 	'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
-/** @type {Map<string, number>} */ export const fromB64 = new Map();
+export const fromB64 = new Map<string, number>();
 for (let i = 0; i < 64; ++i) {
-	fromB64.set(B64[i], i);
+	fromB64.set(B64[i]!, i);
 }

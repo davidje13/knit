@@ -1,16 +1,17 @@
-export class ExpGolomb {
-	constructor(k = 0) {
-		this.k = k;
-	}
+interface Encoder {
+	writeBit(bit: 1 | 0): void;
+	writeBinary(value: number, bits: number): void;
+}
 
-	/**
-	 * @param {{
-	 *   writeBit(bit: 1 | 0): void;
-	 *   writeBinary(value: number, bits: number): void;
-	 * }} encoder
-	 * @param {number} value
-	 */
-	write(encoder, value) {
+interface Decoder {
+	readWhile(check: 1 | 0): number;
+	readBinary(bits: number): number;
+}
+
+export class ExpGolomb {
+	constructor(private readonly k = 0) {}
+
+	write(encoder: Encoder, value: number) {
 		if (value < 0) {
 			throw new Error(`value ${value} out of bounds (positive integer)`);
 		}
@@ -25,13 +26,7 @@ export class ExpGolomb {
 		}
 	}
 
-	/**
-	 * @param {{
-	 *   readWhile(check: 1 | 0): number;
-	 *   readBinary(bits: number): number;
-	 * }} decoder
-	 */
-	read(decoder) {
+	read(decoder: Decoder) {
 		const bits = decoder.readWhile(0) + 1;
 		const a = decoder.readBinary(bits) - 1;
 		if (!this.k) {
@@ -42,8 +37,7 @@ export class ExpGolomb {
 	}
 }
 
-/** @param {number} v */
-function bitLength(v) {
+function bitLength(v: number) {
 	let n = 0;
 	for (; v; v >>>= 1) {
 		++n;

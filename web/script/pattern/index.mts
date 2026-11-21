@@ -1,8 +1,8 @@
-import { Preview } from './Preview.mjs';
-import { EditorPage } from './EditorPage.mjs';
-import { debounce } from './debounce.mjs';
-import { compressImage, decompressImage } from './export/image.mjs';
-import { el } from './dom.mjs';
+import { Preview } from './Preview.mts';
+import { EditorPage } from './EditorPage.mts';
+import { debounce } from './debounce.mts';
+import { compressImage, decompressImage } from './export/image.mts';
+import { el } from './dom.mts';
 
 const favicon = el('link', { rel: 'icon' });
 document.head.append(favicon);
@@ -19,7 +19,7 @@ const editor = new EditorPage({
 	palette: DEFAULT_PALETTE,
 });
 
-/** @type {string | null} */ let lastHash = null;
+let lastHash: string | null = null;
 
 function loadHash() {
 	const hash = window.location.hash.substring(1);
@@ -46,7 +46,7 @@ window.addEventListener('dragover', (e) => {
 
 window.addEventListener('drop', async (e) => {
 	e.preventDefault();
-	const files = [...e.dataTransfer.items]
+	const files = [...(e.dataTransfer?.items ?? [])]
 		.filter((item) => item.kind === 'file' && /^image\//.test(item.type))
 		.map((item) => item.getAsFile());
 
@@ -54,10 +54,10 @@ window.addEventListener('drop', async (e) => {
 		const r = new FileReader();
 		r.addEventListener(
 			'load',
-			() => editor.setReferenceImage(/** @type {string} */ (r.result)),
+			() => editor.setReferenceImage(r.result as string),
 			{ once: true },
 		);
-		r.readAsDataURL(files[0]);
+		r.readAsDataURL(files[0]!);
 	}
 });
 

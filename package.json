@@ -3,7 +3,6 @@
 	"version": "1.0.0",
 	"description": "Knitting Pattern Design Tools",
 	"private": true,
-	"bin": "./cli/png.mjs",
 	"scripts": {
 		"format": "prettier --write .",
 		"start": "rm -rf build; mkdir -p build/static && cp web/config.json build/config.json && web-listener -c build/config.json --dir web/static --no-cache --exec 'rollup --config rollup.config.mjs --watch'",
@@ -26,9 +25,10 @@
 	"devDependencies": {
 		"@rollup/plugin-node-resolve": "16.x",
 		"@rollup/plugin-terser": "1.x",
+		"@rollup/plugin-typescript": "12.x",
 		"@types/node": "24.x",
 		"lean-test": "2.x",
-		"prettier": "3.9.10",
+		"prettier": "3.10.1",
 		"rollup": "4.x",
 		"typescript": "6.0.x",
 		"web-listener": "1.5.x"

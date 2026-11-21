@@ -1,18 +1,21 @@
-import { BitDecoder } from '../data/BitDecoder.mjs';
-import { BitEncoder } from '../data/BitEncoder.mjs';
-import { ExpGolomb } from '../data/ExpGolomb.mjs';
-import { Huffman } from '../data/Huffman.mjs';
+import { BitDecoder } from '../data/BitDecoder.mts';
+import { BitEncoder } from '../data/BitEncoder.mts';
+import { ExpGolomb } from '../data/ExpGolomb.mts';
+import { Huffman } from '../data/Huffman.mts';
+import type { Image } from '../GridView.mts';
 
 const sizeFormat = new ExpGolomb(4);
 const MAX_SIZE = 1000;
 const MAX_PALETTE = 255;
 
-/**
- * @param {{ width: number; height: number; data: number[] | Uint8Array }} image
- * @param {number[]} palette
- * @returns
- */
-export function compressImage({ width, height, data }, palette) {
+export function compressImage(
+	{
+		width,
+		height,
+		data,
+	}: { width: number; height: number; data: number[] | Uint8Array },
+	palette: number[],
+) {
 	const encoder = new BitEncoder();
 	const p = palette.length;
 	sizeFormat.write(encoder, width);
@@ -20,7 +23,7 @@ export function compressImage({ width, height, data }, palette) {
 	sizeFormat.write(encoder, p);
 	const pUsed = new Map();
 	for (let i = 0; i < palette.length; ++i) {
-		const p = palette[i];
+		const p = palette[i]!;
 		encoder.writeBinary(p, 24);
 		const used = data.includes(i);
 		encoder.writeBit(used);
@@ -35,11 +38,9 @@ export function compressImage({ width, height, data }, palette) {
 	return `I${encoder}`;
 }
 
-/**
- * @param {string} compressed
- * @return {import('../GridView.mjs').Image & { palette: number[] }}
- */
-export function decompressImage(compressed) {
+export function decompressImage(
+	compressed: string,
+): Image & { palette: number[] } {
 	if (compressed[0] !== 'I') {
 		throw new Error('unknown image compression');
 	}
@@ -51,8 +52,8 @@ export function decompressImage(compressed) {
 	if (width > MAX_SIZE || height > MAX_SIZE || p > MAX_PALETTE) {
 		throw new Error('unsupported size');
 	}
-	/** @type {number[]} */ const palette = [];
-	/** @type {number[]} */ const pUsed = [];
+	const palette: number[] = [];
+	const pUsed: number[] = [];
 	for (let i = 0; i < p; ++i) {
 		palette.push(decoder.readBinary(24));
 		if (decoder.readBit()) {
@@ -63,19 +64,18 @@ export function decompressImage(compressed) {
 	const data = new Uint8Array(width * height);
 	const huff = getUniformHuffman(pUsed.length - 1);
 	for (let i = 0; i < width * height; ++i) {
-		data[i] = pUsed[huff.read(decoder)];
+		data[i] = pUsed[huff.read(decoder)]!;
 	}
 
 	return { width, height, data, palette };
 }
 
-/** @param {number} limit */
-function getUniformHuffman(limit) {
+function getUniformHuffman(limit: number) {
 	if (limit < 0) {
 		throw new Error(`invalid huffman limit: ${limit}`);
 	}
 	if (!HUFFMAN_CACHE.has(limit)) {
-		/** @type {[number, number][]} */ const symbols = [];
+		const symbols: [number, number][] = [];
 		for (let i = 0; i <= limit; ++i) {
 			symbols.push([i, 1]);
 		}

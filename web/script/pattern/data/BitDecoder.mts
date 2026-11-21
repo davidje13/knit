@@ -1,11 +1,14 @@
-import { fromB64 } from './base64.mjs';
+import { fromB64 } from './base64.mts';
 
 export class BitDecoder {
-	/** @param {string} data */
-	constructor(data) {
-		this.sextets = [];
+	private sextets: number[] = [];
+	declare private readonly l: number;
+	declare private pos: number;
+	declare private bit: number;
+
+	constructor(data: string) {
 		for (let i = 0; i < data.length; ++i) {
-			this.sextets.push(fromB64.get(data[i]));
+			this.sextets.push(fromB64.get(data[i]!)!);
 		}
 		this.l = this.sextets.length;
 		this.pos = 0;
@@ -16,7 +19,7 @@ export class BitDecoder {
 		if (this.pos >= this.l) {
 			throw new Error('out of data');
 		}
-		const v = Boolean(this.sextets[this.pos] & this.bit);
+		const v = Boolean(this.sextets[this.pos]! & this.bit);
 		this.bit >>>= 1;
 		if (!this.bit) {
 			++this.pos;
@@ -25,14 +28,13 @@ export class BitDecoder {
 		return v;
 	}
 
-	/** @param {boolean | 1 | 0} check */
-	readWhile(check) {
+	readWhile(check: boolean | 1 | 0) {
 		if (this.pos >= this.l) {
 			throw new Error('out of data');
 		}
 		check = Boolean(check);
 		let n = 0;
-		while (Boolean(this.sextets[this.pos] & this.bit) === check) {
+		while (Boolean(this.sextets[this.pos]! & this.bit) === check) {
 			this.bit >>>= 1;
 			if (!this.bit) {
 				++this.pos;
@@ -46,8 +48,7 @@ export class BitDecoder {
 		return n;
 	}
 
-	/** @param {number} count */
-	readBits(count) {
+	readBits(count: number) {
 		const r = [];
 		for (let i = 0; i < count; ++i) {
 			r.push(this.readBit());
@@ -62,8 +63,7 @@ export class BitDecoder {
 		}
 	}
 
-	/** @param {number} bits */
-	readBinary(bits) {
+	readBinary(bits: number) {
 		let r = 0;
 		for (let i = 0; i < bits; ++i) {
 			r = (r << 1) | (this.readBit() ? 1 : 0);
