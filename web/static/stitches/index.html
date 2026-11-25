@@ -13,20 +13,38 @@
 		<form action="#">
 			<label>
 				<span class="aligner">Beginning with</span>
-				<input name="begin" type="number" min="0" value="20" step="any" />
+				<input
+					name="begin"
+					type="number"
+					inputmode="decimal"
+					min="0"
+					value="20"
+					step="any"
+				/>
 				stitch<span id="begin-plural">es</span>
 			</label>
 			<label>
 				<span class="aligner">Transition to</span>
-				<input name="end" type="number" min="0" value="20" step="any" />
+				<input
+					name="end"
+					type="number"
+					inputmode="decimal"
+					min="0"
+					value="20"
+					step="any"
+				/>
 				stitch<span id="end-plural">es</span>
 			</label>
 			<label>
 				<span class="aligner">Over</span>
-				<input name="rows" type="number" min="1" value="1" /> row<span
-					id="rows-plural"
-					>s</span
-				>
+				<input
+					name="rows"
+					type="number"
+					inputmode="numeric"
+					min="1"
+					value="1"
+				/>
+				row<span id="rows-plural">s</span>
 			</label>
 			<details>
 				<summary>Customise</summary>
@@ -112,7 +130,13 @@
 					</label>
 					<label id="limit">
 						<span id="limit-label">Max. increase</span>
-						<input name="limit" type="number" min="1" value="3" />
+						<input
+							name="limit"
+							type="number"
+							inputmode="numeric"
+							min="1"
+							value="3"
+						/>
 						per stitch
 					</label>
 					<label id="cast-on">
