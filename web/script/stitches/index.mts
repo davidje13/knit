@@ -359,4 +359,18 @@ function update() {
 for (const i of form.elements) {
 	i.addEventListener('input', update);
 }
+
+form.addEventListener('submit', (e) => {
+	e.preventDefault();
+	update();
+	oResult.focus();
+	oResult.scrollIntoView({ behavior: 'smooth' });
+});
+form.addEventListener('keypress', (e) => {
+	if (e.key === 'Enter') {
+		e.preventDefault();
+		form.requestSubmit();
+	}
+});
+
 update();
