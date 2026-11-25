@@ -46,6 +46,7 @@ const oBeginPlural = document.getElementById('begin-plural')!;
 const oEndPlural = document.getElementById('end-plural')!;
 const oRowsPlural = document.getElementById('rows-plural')!;
 const oInterpolation = document.getElementById('interpolation')!;
+const oSpacing = document.getElementById('spacing')!;
 const oSymmetrical = document.getElementById('symmetrical')!;
 const oDir = document.getElementById('dir')!;
 const oPurlNop = document.getElementById('purl-nop')!;
@@ -90,7 +91,8 @@ function update() {
 		rows < 2 ? 'linear' : inInterpolation.value,
 	);
 
-	const spacingID = inSpacing.value;
+	oSpacing.hidden = rows === 1;
+	const spacingID = rows === 1 ? 'uniform' : inSpacing.value;
 	const spacing =
 		SPACING.get(spacingID) ?? spacingPos(Number.parseFloat(spacingID));
 	const allowSymmetry = ['sides', '0.5'].includes(spacingID);
