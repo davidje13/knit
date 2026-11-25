@@ -7,7 +7,7 @@ import {
 	shift,
 	type ImageAction,
 } from './actions.mts';
-import { el, makeButton } from './dom.mts';
+import { el, makeButton } from '../dom.mts';
 
 export class EditorPage extends EventTarget {
 	declare palette: number[];

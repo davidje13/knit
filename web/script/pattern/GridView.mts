@@ -1,4 +1,4 @@
-import { el } from './dom.mts';
+import { el } from '../dom.mts';
 
 const cGridMinor = '#80808033';
 const cGridMajor = '#80808099';

@@ -1,4 +1,4 @@
-import { el } from './dom.mts';
+import { el } from '../dom.mts';
 
 const GL = WebGL2RenderingContext;
 

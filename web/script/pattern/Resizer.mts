@@ -1,4 +1,4 @@
-import { el } from './dom.mts';
+import { el } from '../dom.mts';
 
 export class Resizer extends (EventTarget as TypedEventTarget<{
 	change: { detail: { width: number; height: number; dx: number; dy: number } };

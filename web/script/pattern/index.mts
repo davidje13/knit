@@ -2,7 +2,7 @@ import { Preview } from './Preview.mts';
 import { EditorPage } from './EditorPage.mts';
 import { debounce } from './debounce.mts';
 import { compressImage, decompressImage } from './export/image.mts';
-import { el } from './dom.mts';
+import { el } from '../dom.mts';
 
 const favicon = el('link', { rel: 'icon' });
 document.head.append(favicon);
