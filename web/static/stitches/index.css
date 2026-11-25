@@ -116,5 +116,6 @@ h2 {
 	& .total {
 		grid-column: 3;
 		opacity: 0.8;
+		align-self: end;
 	}
 }
