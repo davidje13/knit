@@ -174,9 +174,13 @@ export const SPACING = new Map<string, SpacingFn>([
 					const p = (i + 0.5) / n;
 					let cost = 0;
 					for (const r of errorProp) {
-						cost *= 0.8;
+						cost *= 0.9; // free variable, controls how quickly rows are forgotten
 						for (const err of r) {
-							cost += err.s / ((err.p - p) * (err.p - p) + 0.01);
+							let d = err.p - p;
+							if (looped) {
+								d = d > 0.5 ? 1 - d : d < -0.5 ? -1 - d : d;
+							}
+							cost += err.s / (d * d + 0.01);
 						}
 					}
 					costs.push(cost);
@@ -214,7 +218,7 @@ export const SPACING = new Map<string, SpacingFn>([
 						cells.push(method.cell(v + 1, false));
 					}
 				}
-				if (errorProp.length >= 5) {
+				if (errorProp.length >= 8) {
 					errorProp.shift();
 				}
 				errorProp.push(err);

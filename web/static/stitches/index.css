@@ -21,16 +21,27 @@ form {
 	border-radius: 2px;
 	background: #ffffff;
 	display: flex;
-	max-width: max-content;
+	max-width: 400px;
 	flex-flow: column;
 	gap: 8px;
 }
 
-.label {
-	display: inline-block;
-	min-width: 7.5em;
-	text-align: right;
-	margin-right: 4px;
+details {
+	border: 1px solid #ddddee;
+	border-radius: 8px;
+	margin-top: 8px;
+
+	summary {
+		margin-left: 8px;
+		cursor: pointer;
+	}
+
+	& > div {
+		padding: 8px;
+		display: flex;
+		flex-flow: column;
+		gap: 8px;
+	}
 }
 
 input[type='number'] {
@@ -38,9 +49,22 @@ input[type='number'] {
 	font-size: 1rem;
 }
 
+label:not([hidden]):has(select) {
+	display: flex;
+	flex-flow: column;
+	margin-top: 8px;
+}
+
+.aligner {
+	display: inline-block;
+	min-width: 7.5em;
+	text-align: right;
+	margin-right: 4px;
+}
+
 select {
+	align-self: stretch;
 	font-size: 1rem;
-	width: 15em;
 }
 
 #result {
@@ -53,10 +77,8 @@ select {
 }
 
 .vis {
-	box-sizing: border-box;
-	max-width: 100%;
+	max-width: calc(100% - 4px);
 	background: #ffffff;
-	image-rendering: pixelated;
 	border: 2px solid #000000;
 }
 

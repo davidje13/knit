@@ -12,115 +12,117 @@
 		<h1>Stitch Calculator</h1>
 		<form action="#">
 			<label>
-				<span class="label">Beginning with</span>
+				<span class="aligner">Beginning with</span>
 				<input name="begin" type="number" min="0" value="20" step="any" />
 				stitch<span id="begin-plural">es</span>
 			</label>
 			<label>
-				<span class="label">Transition to</span>
+				<span class="aligner">Transition to</span>
 				<input name="end" type="number" min="0" value="20" step="any" />
 				stitch<span id="end-plural">es</span>
 			</label>
 			<label>
-				<span class="label">Over</span>
+				<span class="aligner">Over</span>
 				<input name="rows" type="number" min="1" value="1" /> row<span
 					id="rows-plural"
 					>s</span
 				>
 			</label>
-			<label id="interpolation">
-				<span class="label">To make a</span>
-				<select name="interpolation">
-					<option value="linear" selected="selected">
-						triangle / trapezoid / cone
-					</option>
-					<option value="sine">
-						bowl (set rows &approx; &frac14; &times; max stitches,
-						gauge-dependent)
-					</option>
-				</select>
-			</label>
-			<label>
-				<span class="label">With changes</span>
-				<select name="spacing">
-					<option value="uniform" selected="selected">
-						distributed uniformly
-					</option>
-					<!--<option value="column">in columns</option>-->
-					<option value="0">on the left</option>
-					<option value="1">on the right</option>
-					<option value="sides">on both sides</option>
-					<!--<option value="0.5">down the centre</option>-->
-				</select>
-			</label>
-			<label id="symmetrical">
-				<span class="label"></span>
-				<input type="checkbox" name="symmetrical" checked="checked" />
-				Symmetrical
-			</label>
-			<label id="dir">
-				<span class="label">Knitting</span>
-				<select name="dir">
-					<option value="ss" selected="selected">
-						stocking stitch / stockinette
-					</option>
-					<option value="garter">garter stitch</option>
-					<option value="round">in the round</option>
-				</select>
-			</label>
-			<label>
-				<span class="label">Starting on</span>
-				<select name="dir-1">
-					<option value="k" selected="selected">a knit row</option>
-					<option value="p">a purl row</option>
-				</select>
-			</label>
-			<label id="purl-nop">
-				<span class="label"></span>
-				<input type="checkbox" name="purl-nop" /> Boring purl rows
-			</label>
-			<label id="decrease">
-				<span class="label">Reducing with</span>
-				<select name="type-decrease">
-					<option value="k2tog" selected="selected">
-						Knit 2 Together (k2tog / p2tog)
-					</option>
-					<option value="ssk">Slip Slip Knit (ssk / ssp)</option>
-				</select>
-			</label>
-			<label id="increase">
-				<span class="label">Increasing with</span>
-				<select name="type-increase">
-					<option value="m1">Raised / Strand / Make 1 (m1r / m1l)</option>
-					<option value="yo">Yarn Over (yo)</option>
-					<option value="kp">Knit Purl Increase (kp ... into next st)</option>
-					<option value="kyok">
-						Knit Yarn Over Knit Increase (kyok ... into next st)
-					</option>
-					<option value="bco">Backwards Loop Cast On (bco)</option>
-					<option value="cco">Cable Cast On (cco)</option>
-					<option value="kfb" selected="selected">
-						Knit Front and Back (kfb / pfb / kf&amp;b / pf&amp;b / ktw / ptw)
-					</option>
-					<option value="kll">
-						Lifted / Knit Below / Row Below (lli / rli / llpi / rlpi / kll / krl
-						/ pll / prl)
-					</option>
-				</select>
-			</label>
-			<label id="limit">
-				<span class="label" id="limit-label">Max. increase</span>
-				<input name="limit" type="number" min="1" value="3" />
-				per stitch
-			</label>
-			<label id="cast-on">
-				<span class="label"></span>
-				<input type="checkbox" name="cast-on" /> Include cast on
-			</label>
-			<label id="bind-off">
-				<span class="label"></span>
-				<input type="checkbox" name="bind-off" /> Include bind off
-			</label>
+			<details>
+				<summary>Customise</summary>
+				<div>
+					<label id="interpolation">
+						To make a
+						<select name="interpolation">
+							<option value="linear" selected="selected">
+								triangle / trapezoid / cone
+							</option>
+							<option value="sine">
+								bowl (set rows &approx; &frac14; &times; max stitches,
+								gauge-dependent)
+							</option>
+						</select>
+					</label>
+					<label>
+						With changes
+						<select name="spacing">
+							<option value="uniform">distributed uniformly</option>
+							<!--<option value="column">in columns</option>-->
+							<option value="0">on the left</option>
+							<option value="1" selected="selected">on the right</option>
+							<option value="sides">on both sides</option>
+							<!--<option value="0.5">down the centre</option>-->
+						</select>
+					</label>
+					<label id="symmetrical">
+						<input type="checkbox" name="symmetrical" checked="checked" />
+						Symmetrical
+					</label>
+					<label id="dir">
+						Knitting
+						<select name="dir">
+							<option value="ss" selected="selected">
+								stocking stitch / stockinette
+							</option>
+							<option value="garter">garter stitch</option>
+							<option value="round">in the round</option>
+						</select>
+					</label>
+					<label>
+						Starting on
+						<select name="dir-1">
+							<option value="k" selected="selected">a knit row</option>
+							<option value="p">a purl row</option>
+						</select>
+					</label>
+					<label id="purl-nop">
+						<input type="checkbox" name="purl-nop" /> Boring purl rows
+					</label>
+					<label id="decrease">
+						Reducing with
+						<select name="type-decrease">
+							<option value="k2tog" selected="selected">
+								Knit 2 Together (k2tog / p2tog)
+							</option>
+							<option value="ssk">Slip Slip Knit (ssk / ssp)</option>
+						</select>
+					</label>
+					<label id="increase">
+						Increasing with
+						<select name="type-increase">
+							<option value="m1">Raised / Strand / Make 1 (m1r / m1l)</option>
+							<option value="yo">Yarn Over (yo)</option>
+							<option value="kp">
+								Knit Purl Increase (kp ... into next st)
+							</option>
+							<option value="kyok">
+								Knit Yarn Over Knit Increase (kyok ... into next st)
+							</option>
+							<option value="bco">Backwards Loop Cast On (bco)</option>
+							<option value="cco">Cable Cast On (cco)</option>
+							<option value="kfb" selected="selected">
+								Knit Front and Back (kfb / pfb / kf&amp;b / pf&amp;b / ktw /
+								ptw)
+							</option>
+							<option value="kll">
+								Lifted / Knit Below / Row Below (lli / rli / llpi / rlpi / kll /
+								krl / pll / prl)
+							</option>
+						</select>
+					</label>
+					<label id="limit">
+						<span id="limit-label">Max. increase</span>
+						<input name="limit" type="number" min="1" value="3" />
+						per stitch
+					</label>
+					<label id="cast-on">
+						<input type="checkbox" name="cast-on" /> Include cast on
+					</label>
+					<label id="bind-off">
+						<input type="checkbox" name="bind-off" /> Include bind off
+					</label>
+				</div>
+			</details>
 		</form>
 		<div id="result" aria-live="polite"></div>
 	</body>

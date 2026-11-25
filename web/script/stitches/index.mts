@@ -14,6 +14,8 @@ import { INTERPOLATION } from './interpolation.mts';
 import { DECREASE, INCREASE } from './methods.mts';
 import { SPACING, spacingPos } from './spacing.mts';
 
+const dpr = window.devicePixelRatio ?? 1;
+
 const form = document.getElementsByTagName('form')[0]!;
 const inBegin = form.elements.namedItem('begin') as HTMLInputElement;
 const inEnd = form.elements.namedItem('end') as HTMLInputElement;
@@ -203,31 +205,35 @@ function update() {
 			}
 		}
 		const CELL_SIZE = 10;
-		oVis.width = maxW * CELL_SIZE;
-		oVis.height = n * CELL_SIZE;
-		ctxVis.clearRect(0, 0, maxW * CELL_SIZE, n * CELL_SIZE);
+		const cellPx = CELL_SIZE * dpr;
+		const dispW = Math.ceil(Math.max(maxW, 1) / 5) * 5;
+		oVis.width = dispW * cellPx;
+		oVis.height = n * cellPx;
+		oVis.style.width = `${dispW * CELL_SIZE}px`;
+		ctxVis.clearRect(0, 0, dispW * cellPx, n * cellPx);
 		ctxVis.fillStyle = '#808080';
 		for (const row of rowData) {
 			ctxVis.fillRect(
-				Math.ceil((maxW - row.stitches) * (1 - align)) * CELL_SIZE,
-				(n - row.n - 1) * CELL_SIZE,
-				row.stitches * CELL_SIZE,
-				CELL_SIZE,
+				Math.ceil((maxW - row.stitches) * (1 - align)) * cellPx,
+				(n - row.n - 1) * cellPx,
+				row.stitches * cellPx,
+				cellPx,
 			);
 		}
-		ctxVis.fillStyle = '#00000080';
 		for (const row of rowData) {
-			ctxVis.fillRect(0, (n - row.n) * CELL_SIZE - 1, maxW * CELL_SIZE, 1);
+			ctxVis.fillStyle = !(row.n % 5) ? '#00000080' : '#00000020';
+			ctxVis.fillRect(0, (n - row.n) * cellPx - dpr, dispW * cellPx, 2 * dpr);
 		}
-		for (let x = 1; x < maxW; ++x) {
-			ctxVis.fillRect(x * CELL_SIZE - 1, 0, 1, n * CELL_SIZE);
+		for (let x = 1; x < dispW; ++x) {
+			ctxVis.fillStyle = !(x % 5) ? '#00000080' : '#00000020';
+			ctxVis.fillRect(x * cellPx - dpr, 0, 2 * dpr, n * cellPx);
 		}
 		ctxVis.strokeStyle = '#CC0000CC';
-		ctxVis.lineWidth = 2;
+		ctxVis.lineWidth = 2 * dpr;
 		ctxVis.beginPath();
 		for (let r = 0; r <= rows; r += 0.125) {
-			const x = (maxW + (fn(r / rows) - maxW) * align) * CELL_SIZE;
-			const y = (n - r - shapeBegin - 0.5) * CELL_SIZE;
+			const x = (maxW + (fn(r / rows) - maxW) * align) * cellPx;
+			const y = (n - r - shapeBegin - 0.5) * cellPx;
 			if (r) {
 				ctxVis.lineTo(x, y);
 			} else {
@@ -237,8 +243,8 @@ function update() {
 		ctxVis.stroke();
 		ctxVis.beginPath();
 		for (let r = 0; r <= rows; r += 0.125) {
-			const x = (maxW - fn(r / rows)) * (1 - align) * CELL_SIZE;
-			const y = (n - r - shapeBegin - 0.5) * CELL_SIZE;
+			const x = (maxW - fn(r / rows)) * (1 - align) * cellPx;
+			const y = (n - r - shapeBegin - 0.5) * cellPx;
 			if (r) {
 				ctxVis.lineTo(x, y);
 			} else {
